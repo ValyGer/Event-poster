@@ -55,7 +55,7 @@ services:
       - /data/ewm-service-db
     container_name: ewm-service-db
     ports:
-      - "6542:5442"
+      - "6542:5432"
     environment:
       - TZ=Europe/Moscow
       - POSTGRES_DB=shareit

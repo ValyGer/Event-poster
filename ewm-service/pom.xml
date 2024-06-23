@@ -10,7 +10,7 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>ewm-service</artifactId>
+    <artifactId>ewm-application</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
     <properties>
