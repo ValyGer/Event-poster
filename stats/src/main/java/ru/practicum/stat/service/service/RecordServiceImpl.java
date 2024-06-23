@@ -20,9 +20,11 @@ public class RecordServiceImpl implements RecordService {
     private final RecordMapper recordMapper;
 
     public HttpStatus addRecord(RecordDto recordDto) {
+        log.info("Выполнение проверки существования сервиса {} в базе статистики", recordDto.getApp());
         Application application = getApplicationId(recordDto.getApp());
         Record record = recordMapper.toRecord(recordDto);
         record.setApp(application);
+        log.info("Сохранение в базу информации о запросе {}", recordDto);
         recordRepository.save(record);
         return HttpStatus.OK;
     }

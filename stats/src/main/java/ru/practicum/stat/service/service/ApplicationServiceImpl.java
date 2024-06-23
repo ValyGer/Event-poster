@@ -16,11 +16,12 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final ApplicationRepository applicationRepository;
 
     public Optional<Application> fineByName(String app) {
+        log.info("Выполнение поиска сервиса с именем {}", app);
         return applicationRepository.findByApp(app);
     }
 
     public Optional<Application> add(String app) {
-        Application application = new Application(app);
-        return Optional.of(applicationRepository.save(application));
+        log.info("Сохранение сервиса с именем {}", app);
+        return Optional.of(applicationRepository.save(new Application(app)));
     }
 }

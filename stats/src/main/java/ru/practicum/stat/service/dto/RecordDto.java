@@ -1,14 +1,12 @@
 package ru.practicum.stat.service.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@ToString
 @RequiredArgsConstructor
 @AllArgsConstructor
 public class RecordDto {
