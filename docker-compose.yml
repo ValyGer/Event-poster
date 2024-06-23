@@ -1,15 +1,68 @@
-version: '3.1'
+version: '3.8'
 services:
   stats-server:
+    build: stats
+    image: stats
+    restart: "on-failure"
+    container_name: explore-with-me-stats
     ports:
       - "9090:9090"
+    depends_on:
+      - ewm-service
+      - stats-db
+    environment:
+      - EWM-SERVER_URL=http://server:8080
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/stats
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123456
 
   stats-db:
     image: postgres:14-alpine
+    
+    volumes:
+      - /data/stats-db
+    container_name: stats-db
+    ports:
+      - "6541:5432"
+    environment:
+      - TZ=Europe/Moscow
+      - POSTGRES_DB=stats
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123456
+    healthcheck:
+      test: pg_isready -U postgres -d stats
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 
   ewm-service:
+    build: ewm-service
+    image: ewm-service
+    restart: "on-failure"
     ports:
       - "8080:8080"
+    depends_on:
+      - ewm-db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5442/ewm-service
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123456
 
   ewm-db:
     image: postgres:14-alpine
+    volumes:
+      - /data/ewm-service-db
+    container_name: ewm-service-db
+    ports:
+      - "6542:5442"
+    environment:
+      - TZ=Europe/Moscow
+      - POSTGRES_DB=shareit
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123456
+    healthcheck:
+      test: pg_isready -U postgres -d ewm-service
+      interval: 10s
+      timeout: 5s
+      retries: 5
