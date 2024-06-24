@@ -15,7 +15,6 @@ import ru.practicum.stat.service.model.Record;
 import ru.practicum.stat.service.repository.RecordRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,11 +44,10 @@ public class RecordServiceImpl implements RecordService {
     }
 
     public List<ApplicationDtoForHitsInt> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
-        System.out.println("меня вызвали!");
         if (end.isBefore(start)) {
             throw new DataTimeException("Дата окончания не может быть раньше даты начала");
         }
-        List<ApplicationDtoForHits> statistic = new ArrayList<>();
+        List<ApplicationDtoForHits> statistic;
         if (unique) { // Вывод статистики только для уникальных запросов
             if (uris == null || uris.isEmpty()) {
                 log.info("Получение статистики уникальных запросов для серверов где URIs пустой");

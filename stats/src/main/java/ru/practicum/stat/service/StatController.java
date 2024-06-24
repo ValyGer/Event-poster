@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.stat.service.dto.ApplicationDtoForHits;
 import ru.practicum.stat.service.dto.ApplicationDtoForHitsInt;
 import ru.practicum.stat.service.dto.RecordDto;
 import ru.practicum.stat.service.service.RecordService;
