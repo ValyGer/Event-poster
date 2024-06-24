@@ -5,15 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.practicum.stat.service.dto.ApplicationDto;
 import ru.practicum.stat.service.dto.RecordDto;
 import ru.practicum.stat.service.service.RecordService;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -24,14 +22,19 @@ public class StatController {
     private final RecordService recordService;
 
     @GetMapping("/stats")
-    public ResponseEntity<List<ApplicationDto>> getStats() {
-        return null;
+    public ResponseEntity<List<ApplicationDto>> getStats(@RequestParam("start") LocalDateTime start,
+                                                         @RequestParam("end") LocalDateTime end,
+                                                         @RequestParam(value = "uris", required = false) List<String> uris,
+                                                         @RequestParam(value = "unique", defaultValue = "false") boolean unique) {
+        log.info("Вызван метода с запросом статистики в период с {} до {}, для следующих серверов {}. " +
+                "Выбраны только уникальные значения - {}", start, end, uris, unique);
+        return ResponseEntity.ok(recordService.getStats(start, end, uris, unique));
     }
 
     @PostMapping("/hit")
     @Transactional
     public ResponseEntity<HttpStatus> addRecord(@Valid @RequestBody RecordDto recordDto) {
         log.info("Вызван метод добавления записи в статистику {}", recordDto);
-        return ResponseEntity.ok(recordService.addRecord(recordDto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(recordService.addRecord(recordDto));
     }
 }
