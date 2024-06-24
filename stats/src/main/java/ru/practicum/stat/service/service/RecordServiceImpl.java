@@ -35,7 +35,8 @@ public class RecordServiceImpl implements RecordService {
         Record record = recordMapper.toRecord(recordDto);
         record.setApp(application);
         log.info("Сохранение в базу информации о запросе {}", record);
-        recordRepository.save(record);
+        Record saveRecord = recordRepository.save(record);
+        System.out.println(saveRecord);
         return HttpStatus.OK;
     }
 
@@ -52,17 +53,24 @@ public class RecordServiceImpl implements RecordService {
             if (uris == null || uris.isEmpty()) {
                 log.info("Получение статистики уникальных запросов для серверов где URIs пустой");
                 statistic = recordRepository.findAllUniqueRecordsWhenUriIsEmpty(start, end);
+                System.out.println(statistic);
             } else {
                 log.info("Получение статистики уникальных запросов для перечисленных URIs");
                 statistic = recordRepository.findAllUniqueRecordsWhenUriIsNotEmpty(start, end, uris);
+                System.out.println(statistic);
+
             }
         } else { // Вывод статистики для всех запросов
             if (uris == null || uris.isEmpty()) {
                 log.info("Получение статистики без учета уникальных запросов для серверов где URIs пустой");
                 statistic = recordRepository.findAllRecordsWhenUriIsEmpty(start, end);
+                System.out.println(statistic);
+
             } else {
-                log.info("Получение статистики уникальных запросов для перечисленных URIs");
+                log.info("Получение статистики без учета уникальных запросов для перечисленных URIs");
                 statistic = recordRepository.findAllRecordsWhenStarEndUris(start, end, uris);
+                System.out.println(statistic);
+
             }
         }
         return statistic.stream().map(applicationMapper::toApplicationDtoForHitsInt).collect(Collectors.toList());
