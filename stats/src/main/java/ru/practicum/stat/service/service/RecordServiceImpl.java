@@ -4,15 +4,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import ru.practicum.stat.service.dto.ApplicationDto;
+import ru.practicum.stat.service.dto.ApplicationDtoForHits;
+import ru.practicum.stat.service.dto.ApplicationDtoForHitsInt;
 import ru.practicum.stat.service.dto.RecordDto;
+import ru.practicum.stat.service.exceptions.DataTimeException;
+import ru.practicum.stat.service.mapper.ApplicationMapper;
 import ru.practicum.stat.service.mapper.RecordMapper;
 import ru.practicum.stat.service.model.Application;
 import ru.practicum.stat.service.model.Record;
 import ru.practicum.stat.service.repository.RecordRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +27,7 @@ public class RecordServiceImpl implements RecordService {
     private final ApplicationService applicationService;
     private final RecordRepository recordRepository;
     private final RecordMapper recordMapper;
+    private final ApplicationMapper applicationMapper;
 
     public HttpStatus addRecord(RecordDto recordDto) {
         log.info("Выполнение проверки существования сервиса {} в базе статистики", recordDto.getApp());
@@ -38,35 +44,29 @@ public class RecordServiceImpl implements RecordService {
         return applicationService.fineByName(app).orElseGet(() -> applicationService.add(app).get());
     }
 
-    public List<ApplicationDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
-        return null;
-
-
-//        List<StatWithHits> result;
-//
-//        if (end.isBefore(start)) {
-//            throw new DataException("Дата окончания не может быть раньше даты начала");
-//        }
-//        if (unique) {
-//            if (uris == null || uris.isEmpty()) {
-//                log.info("Получение статистики: в запросе эндпоинтов нет, unique = true");
-//                result = statRepository.findAllUniqueWhenUriIsEmpty(start, end);
-//            } else {
-//                log.info("Получение статистики: в запросе эндпоинты есть, unique = true");
-//                result = statRepository.findAllUniqueWhenUriIsNotEmpty(start, end, uris);
-//            }
-//        } else {
-//            if (uris == null || uris.isEmpty()) {
-//                log.info("Получение статистики: в запросе эндпоинтов нет, unique = false");
-//                result = statRepository.findAllWhenUriIsEmpty(start, end);
-//            } else {
-//                log.info("Получение статистики: в запросе эндпоинты есть, unique = false");
-//                result = statRepository.findAllWhenStarEndUris(start, end, uris);
-//            }
-//        }
-//
-//        return result.stream().map(statMapper::mapToDtoForView).collect(Collectors.toList());
-//    }
+    public List<ApplicationDtoForHitsInt> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
+        System.out.println("меня вызвали!");
+        if (end.isBefore(start)) {
+            throw new DataTimeException("Дата окончания не может быть раньше даты начала");
+        }
+        List<ApplicationDtoForHits> statistic = new ArrayList<>();
+        if (unique) { // Вывод статистики только для уникальных запросов
+            if (uris == null || uris.isEmpty()) {
+                log.info("Получение статистики уникальных запросов для серверов где URIs пустой");
+                statistic = recordRepository.findAllUniqueRecordsWhenUriIsEmpty(start, end);
+            } else {
+                log.info("Получение статистики уникальных запросов для перечисленных URIs");
+                statistic = recordRepository.findAllUniqueRecordsWhenUriIsNotEmpty(start, end, uris);
+            }
+        } else { // Вывод статистики для всех запросов
+            if (uris == null || uris.isEmpty()) {
+                log.info("Получение статистики без учета уникальных запросов для серверов где URIs пустой");
+                statistic = recordRepository.findAllRecordsWhenUriIsEmpty(start, end);
+            } else {
+                log.info("Получение статистики уникальных запросов для перечисленных URIs");
+                statistic = recordRepository.findAllRecordsWhenStarEndUris(start, end, uris);
+            }
+        }
+        return statistic.stream().map(applicationMapper::toApplicationDtoForHitsInt).collect(Collectors.toList());
     }
-
 }
