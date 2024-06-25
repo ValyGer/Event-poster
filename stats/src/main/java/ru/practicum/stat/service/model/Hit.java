@@ -9,15 +9,15 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "records")
+@Table(name = "hits")
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
-public class Record {
+public class Hit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "rec_id")
+    @Column(name = "hit_id")
     private long id;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "app_id")

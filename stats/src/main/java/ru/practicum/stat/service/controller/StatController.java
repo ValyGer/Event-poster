@@ -8,8 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.stat.service.dto.ApplicationDtoForHitsInt;
-import ru.practicum.stat.service.dto.RecordDto;
-import ru.practicum.stat.service.service.RecordService;
+import ru.practicum.stat.service.dto.HitDto;
+import ru.practicum.stat.service.service.HitService;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
@@ -20,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StatController {
 
-    private final RecordService recordService;
+    private final HitService hitService;
 
     @GetMapping("/stats")
     public ResponseEntity<List<ApplicationDtoForHitsInt>> getStats(
@@ -30,13 +30,13 @@ public class StatController {
             @RequestParam(value = "unique", defaultValue = "false") boolean unique) {
         log.info("Вызван метода с запросом статистики в период с {} до {}, для следующих серверов {}. " +
                 "Выбраны только уникальные значения - {}", start, end, uris, unique);
-        return ResponseEntity.ok(recordService.getStats(start, end, uris, unique));
+        return ResponseEntity.ok(hitService.getStats(start, end, uris, unique));
     }
 
     @PostMapping("/hit")
     @Transactional
-    public ResponseEntity<HttpStatus> addRecord(@Valid @RequestBody RecordDto recordDto) {
-        log.info("Вызван метод добавления записи в статистику {}", recordDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(recordService.addRecord(recordDto));
+    public ResponseEntity<HttpStatus> addHit(@Valid @RequestBody HitDto hitDto) {
+        log.info("Вызван метод добавления записи в статистику {}", hitDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(hitService.addHit(hitDto));
     }
 }
