@@ -53,24 +53,17 @@ public class RecordServiceImpl implements RecordService {
             if (uris == null || uris.isEmpty()) {
                 log.info("Получение статистики уникальных запросов для серверов где URIs пустой");
                 statistic = recordRepository.findAllUniqueRecordsWhenUriIsEmpty(start, end);
-                System.out.println(statistic);
             } else {
                 log.info("Получение статистики уникальных запросов для перечисленных URIs");
                 statistic = recordRepository.findAllUniqueRecordsWhenUriIsNotEmpty(start, end, uris);
-                System.out.println(statistic);
-
             }
         } else { // Вывод статистики для всех запросов
             if (uris == null || uris.isEmpty()) {
                 log.info("Получение статистики без учета уникальных запросов для серверов где URIs пустой");
                 statistic = recordRepository.findAllRecordsWhenUriIsEmpty(start, end);
-                System.out.println(statistic);
-
             } else {
                 log.info("Получение статистики без учета уникальных запросов для перечисленных URIs");
                 statistic = recordRepository.findAllRecordsWhenStarEndUris(start, end, uris);
-                System.out.println(statistic);
-
             }
         }
         return statistic.stream().map(applicationMapper::toApplicationDtoForHitsInt).collect(Collectors.toList());
