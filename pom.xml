@@ -11,18 +11,16 @@
 	</parent>
 
 	<name>Explore With Me</name>
-	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-autoconfigure</artifactId>
-			<scope>compile</scope>
-		</dependency>
-	</dependencies>
 
 	<groupId>ru.practicum</groupId>
 	<artifactId>explore-with-me</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
+
+	<modules>
+		<module>stats-service</module>
+		<module>ewm-service</module>
+	</modules>
 
 	<properties>
 		<java.version>11</java.version>
@@ -30,26 +28,7 @@
 		<jackson.version>2.13.3</jackson.version>
 	</properties>
 
-	<modules>
-		<module>stats</module>
-		<module>ewm-service</module>
-	</modules>
-
 	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<exclude>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-						</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
-		</plugins>
 		<pluginManagement>
 			<plugins>
 				<plugin>

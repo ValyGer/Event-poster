@@ -1,10 +1,10 @@
 version: '3.8'
 services:
   stats-server:
-    build: stats
-    image: stats
+    build: stats-service/server
+    image: stats-service
     restart: "on-failure"
-    container_name: explore-with-me-stats
+    container_name: explore-with-me-stats-service
     ports:
       - "9090:9090"
     depends_on:
@@ -12,7 +12,7 @@ services:
       - stats-db
     environment:
       - EWM-SERVER_URL=http://server:8080
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/stats
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/stats-db
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=123456
 
