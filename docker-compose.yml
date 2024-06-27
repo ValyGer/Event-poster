@@ -4,21 +4,18 @@ services:
     build: stats-service/server
     image: stats-service
     restart: "on-failure"
-    container_name: explore-with-me-stats-service
+    container_name: stats-service
     ports:
       - "9090:9090"
     depends_on:
-      - ewm-service
       - stats-db
     environment:
-      - EWM-SERVER_URL=http://server:8080
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/stats-db
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=123456
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/stats-db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=123456
 
   stats-db:
     image: postgres:14-alpine
-    
     volumes:
       - /data/stats-db
     container_name: stats-db
@@ -26,11 +23,11 @@ services:
       - "6541:5432"
     environment:
       - TZ=Europe/Moscow
-      - POSTGRES_DB=stats
+      - POSTGRES_DB=stats-db
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=123456
     healthcheck:
-      test: pg_isready -U postgres -d stats
+      test: pg_isready -U postgres -d stats-db
       interval: 10s
       timeout: 5s
       retries: 5
@@ -40,29 +37,31 @@ services:
     build: ewm-service
     image: ewm-service
     restart: "on-failure"
+    container_name: ewm-service
     ports:
       - "8080:8080"
     depends_on:
       - ewm-db
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5442/ewm-service
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=123456
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5442/ewm-db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=123456
+      - stats-service.url=http://stats-server:9090
 
   ewm-db:
     image: postgres:14-alpine
     volumes:
-      - /data/ewm-service-db
-    container_name: ewm-service-db
+      - /data/ewm-db
+    container_name: ewm-db
     ports:
       - "6542:5432"
     environment:
       - TZ=Europe/Moscow
-      - POSTGRES_DB=shareit
+      - POSTGRES_DB=ewm-db
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=123456
     healthcheck:
-      test: pg_isready -U postgres -d ewm-service
+      test: pg_isready -U postgres -d ewm-db
       interval: 10s
       timeout: 5s
       retries: 5
