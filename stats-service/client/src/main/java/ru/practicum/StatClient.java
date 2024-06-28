@@ -17,7 +17,6 @@ import java.util.Map;
 @Slf4j
 public class StatClient extends BaseClient {
 
-
     @Autowired
     public StatClient(@Value("${stats-service.url}")String serverUrl, RestTemplateBuilder builder) {
         super(
@@ -40,6 +39,6 @@ public class StatClient extends BaseClient {
 
     public ResponseEntity<Object> addHit(HitDto hitDto) {
         log.info("Выполнение запрос на добавление события вызова сервиса в статистику через модуль client");
-        return post("/hit", hitDto);
+        return post("/hit", null, hitDto);
     }
 }
