@@ -1,8 +1,9 @@
 package ru.practicum.service;
 
 import org.springframework.http.HttpStatus;
-import ru.practicum.dto.ApplicationDtoForHitsInt;
-import ru.practicum.dto.HitDto;
+import ru.practicum.ApplicationDtoForHitsInt;
+import ru.practicum.HitDto;
+
 
 import java.time.LocalDateTime;
 import java.util.List;

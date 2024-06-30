@@ -2,9 +2,9 @@ package ru.practicum.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import ru.practicum.ApplicationDtoForHitsInt;
 import ru.practicum.dtoSer.ApplicationDto;
 import ru.practicum.dtoSer.ApplicationDtoForHits;
-import ru.practicum.dto.ApplicationDtoForHitsInt;
 import ru.practicum.model.Application;
 
 @Mapper(componentModel = "spring")
