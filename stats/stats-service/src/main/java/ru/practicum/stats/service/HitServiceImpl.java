@@ -14,7 +14,6 @@ import ru.practicum.stats.model.Application;
 import ru.practicum.stats.model.Hit;
 import ru.practicum.stats.repository.HitRepository;
 
-
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
