@@ -5,11 +5,10 @@ import lombok.*;
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
+@NoArgsConstructor
 @AllArgsConstructor
-public class HitDto {
+public class ViewStats {
     private String app;
     private String uri;
-    private String ip;
-    private String timestamp;
+    private long hits;
 }

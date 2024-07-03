@@ -7,8 +7,9 @@ import lombok.*;
 @ToString
 @RequiredArgsConstructor
 @AllArgsConstructor
-public class ApplicationDtoForHitsInt {
+public class EndpointHit {
     private String app;
     private String uri;
-    private int hits;
+    private String ip;
+    private String timestamp;
 }
