@@ -19,11 +19,8 @@ public class Hit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "hit_id")
     private long id;
-//    @Column(name = "app")
     private String app;
-//    @Column(name = "uri")
     private String uri;
-//    @Column(name = "ip")
     private String ip;
     @Column(name = "timestamp")
     private LocalDateTime timestamp;

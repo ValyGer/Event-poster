@@ -37,23 +37,23 @@ public class HitServiceImpl implements HitService {
             throw new DataTimeException("Дата окончания не может быть раньше даты начала");
         }
         List<ViewStats> statistic;
-//        if (unique) { // Вывод статистики только для уникальных запросов
-//            if (uris == null || uris.isEmpty()) {
+        if (unique) { // Вывод статистики только для уникальных запросов
+            if (uris == null || uris.isEmpty()) {
                 log.info("Получение статистики уникальных запросов для серверов где URIs пустой");
                 statistic = hitRepository.findAllUniqueHitsWhenUriIsEmpty(start, end);
-//            } else {
-//                log.info("Получение статистики уникальных запросов для перечисленных URIs");
-//                statistic = hitRepository.findAllUniqueHitsWhenUriIsNotEmpty(start, end, uris);
-//            }
-//        } else { // Вывод статистики для всех запросов
-//            if (uris == null || uris.isEmpty()) {
-//                log.info("Получение статистики без учета уникальных запросов для серверов где URIs пустой");
-//                statistic = hitRepository.findAllHitsWhenUriIsEmpty(start, end);
-//            } else {
-//                log.info("Получение статистики без учета уникальных запросов для перечисленных URIs");
-//                statistic = hitRepository.findAllHitsWhenStarEndUris(start, end, uris);
-//            }
-//        }
+            } else {
+                log.info("Получение статистики уникальных запросов для перечисленных URIs");
+                statistic = hitRepository.findAllUniqueHitsWhenUriIsNotEmpty(start, end, uris);
+            }
+        } else { // Вывод статистики для всех запросов
+            if (uris == null || uris.isEmpty()) {
+                log.info("Получение статистики без учета уникальных запросов для серверов где URIs пустой");
+                statistic = hitRepository.findAllHitsWhenUriIsEmpty(start, end);
+            } else {
+                log.info("Получение статистики без учета уникальных запросов для перечисленных URIs");
+                statistic = hitRepository.findAllHitsWhenStarEndUris(start, end, uris);
+            }
+        }
         return statistic;
     }
 }

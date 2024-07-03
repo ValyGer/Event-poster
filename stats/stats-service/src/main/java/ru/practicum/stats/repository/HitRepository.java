@@ -19,27 +19,27 @@ public interface HitRepository extends JpaRepository<Hit, Long> {
             "order by count (distinct h.ip) desc")
     List<ViewStats> findAllUniqueHitsWhenUriIsEmpty(LocalDateTime start, LocalDateTime end);
 
-//    @Query("select new ru.practicum.stats.ViewStats(vs.app, vs.uri, count (distinct vs.ip)) "
-//            + "from ViewStats vs "
-//            + "where vs.timestamp between ?1 and ?2 "
-//            + "and vs.uri in (?3)"
-//            + "group by vs.app, vs.uri "
-//            + "order by count (distinct vs.ip) desc ")
-//    List<ViewStats> findAllUniqueHitsWhenUriIsNotEmpty(
-//            LocalDateTime start, LocalDateTime end, List<String> uris);
-//
-//    @Query("select new ru.practicum.stats.ViewStats(vs.app, vs.uri, count (vs.ip))" +
-//            "from ViewStats vs " +
-//            "where vs.timestamp between ?1 and ?2 " +
-//            "group by vs.app, vs.uri " +
-//            "order by count (vs.ip) desc")
-//    List<ViewStats> findAllHitsWhenUriIsEmpty(LocalDateTime start, LocalDateTime end);
-//
-//    @Query("select new ru.practicum.stats.ViewStats(vs.app, vs.uri, count (vs.ip)) "
-//            + "from ViewStats vs "
-//            + "where vs.timestamp between ?1 and ?2 "
-//            + "and vs.uri in (?3)"
-//            + "group by vs.app, vs.uri "
-//            + "order by count (vs.ip) desc")
-//    List<ViewStats> findAllHitsWhenStarEndUris(LocalDateTime start, LocalDateTime end, List<String> uris);
+    @Query("select new ru.practicum.stats.ViewStats(h.app, h.uri, count (distinct h.ip)) "
+            + "from Hit h "
+            + "where h.timestamp between ?1 and ?2 "
+            + "and h.uri in (?3)"
+            + "group by h.app, h.uri "
+            + "order by count (distinct h.ip) desc ")
+    List<ViewStats> findAllUniqueHitsWhenUriIsNotEmpty(
+            LocalDateTime start, LocalDateTime end, List<String> uris);
+
+    @Query("select new ru.practicum.stats.ViewStats(h.app, h.uri, count (h.ip))" +
+            "from Hit h " +
+            "where h.timestamp between ?1 and ?2 " +
+            "group by h.app, h.uri " +
+            "order by count (h.ip) desc")
+    List<ViewStats> findAllHitsWhenUriIsEmpty(LocalDateTime start, LocalDateTime end);
+
+    @Query("select new ru.practicum.stats.ViewStats(h.app, h.uri, count (h.ip)) "
+            + "from Hit h "
+            + "where h.timestamp between ?1 and ?2 "
+            + "and h.uri in (?3)"
+            + "group by h.app, h.uri "
+            + "order by count (h.ip) desc")
+    List<ViewStats> findAllHitsWhenStarEndUris(LocalDateTime start, LocalDateTime end, List<String> uris);
 }
