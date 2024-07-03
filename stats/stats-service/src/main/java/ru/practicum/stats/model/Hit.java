@@ -19,12 +19,11 @@ public class Hit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "hit_id")
     private long id;
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "app_id")
-    private Application app;
-    @Column(name = "uri")
+//    @Column(name = "app")
+    private String app;
+//    @Column(name = "uri")
     private String uri;
-    @Column(name = "ip")
+//    @Column(name = "ip")
     private String ip;
     @Column(name = "timestamp")
     private LocalDateTime timestamp;

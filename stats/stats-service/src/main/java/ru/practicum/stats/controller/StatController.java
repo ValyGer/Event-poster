@@ -7,8 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.stats.ApplicationDtoForHitsInt;
-import ru.practicum.stats.HitDto;
+import ru.practicum.stats.EndpointHit;
+import ru.practicum.stats.ViewStats;
 import ru.practicum.stats.service.HitService;
 
 import java.time.LocalDateTime;
@@ -22,7 +22,7 @@ public class StatController {
     private final HitService hitService;
 
     @GetMapping("/stats")
-    public ResponseEntity<List<ApplicationDtoForHitsInt>> getStats(
+    public ResponseEntity<List<ViewStats>> getStats(
             @RequestParam("start") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
             @RequestParam("end") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
             @RequestParam(value = "uris", required = false) List<String> uris,
@@ -34,9 +34,9 @@ public class StatController {
 
     @PostMapping("/hit")
     @Transactional
-    public ResponseEntity<HttpStatus> addHit(@RequestBody HitDto hitDto) {
-        log.info("Вызван метод добавления записи в статистику {}", hitDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(hitService.addHit(hitDto));
+    public ResponseEntity<HttpStatus> addHit(@RequestBody EndpointHit endpointHit) {
+        log.info("Вызван метод добавления записи в статистику {}", endpointHit);
+        return ResponseEntity.status(HttpStatus.CREATED).body(hitService.addHit(endpointHit));
     }
 }
 

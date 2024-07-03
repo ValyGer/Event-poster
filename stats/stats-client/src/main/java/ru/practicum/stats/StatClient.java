@@ -36,8 +36,8 @@ public class StatClient extends BaseClient {
         return get("/stats?start={start}&end={end}&uris={uris}&unique={unique}", parameters);
     }
 
-    public ResponseEntity<Object> addHit(HitDto hitDto) {
+    public ResponseEntity<Object> addHit(EndpointHit endpointHit) {
         log.info("Выполнение запрос на добавление события вызова сервиса в статистику через модуль client");
-        return post("/hit", null, hitDto);
+        return post("/hit", null, endpointHit);
     }
 }
