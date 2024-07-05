@@ -3,12 +3,11 @@ package ru.practicum.ewm.user.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.user.dto.UserDto;
 import ru.practicum.ewm.user.dto.UserDtoRequest;
 import ru.practicum.ewm.user.dto.UserMapper;
-import ru.practicum.ewm.user.exceptions.NotFoundException;
+import ru.practicum.ewm.errors.NotFoundException;
 import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.repository.UserRepository;
 

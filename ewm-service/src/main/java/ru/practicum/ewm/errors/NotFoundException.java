@@ -1,4 +1,4 @@
-package ru.practicum.ewm.user.exceptions;
+package ru.practicum.ewm.errors;
 
 public class NotFoundException extends RuntimeException{
     public NotFoundException(String message) {

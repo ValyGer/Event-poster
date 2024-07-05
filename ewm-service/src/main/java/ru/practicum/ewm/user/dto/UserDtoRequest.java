@@ -16,10 +16,10 @@ import javax.validation.constraints.Size;
 public class UserDtoRequest {
 
     @NotBlank
-    @Size(min = 2, max = 250, message = "Имя должно быть длинной от 2 до 250 символов")
+    @Size(min = 2, max = 250, message = "The name must be between 2 and 250 characters long")
     private String name;
     @Email
     @NotBlank
-    @Size(min = 2, max = 250, message = "Имя должно быть длинной от 2 до 250 символов")
+    @Size(min = 6, max = 254, message = "The email must be between 6 and 254 characters long")
     private String email;
 }
