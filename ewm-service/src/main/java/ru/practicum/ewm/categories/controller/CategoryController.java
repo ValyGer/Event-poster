@@ -41,17 +41,15 @@ public class CategoryController {
 
     // Часть public
 
-    @GetMapping(value = "/categories")
+    @GetMapping("/categories")
     public ResponseEntity<List<CategoryDto>> getAllCategories(
             @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
             @Positive @RequestParam(required = false, defaultValue = "10") Integer size) {
         return ResponseEntity.status(HttpStatus.OK).body(categoryService.getAllCategories(from, size));
     }
 
-    @GetMapping(value = "/categories/{catId}")
-    public ResponseEntity<CategoryDto> getCategory(@RequestParam(required = false) Long catsId,
-                                                   @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
-                                                   @Positive @RequestParam(required = false, defaultValue = "10") Integer size) {
-        return ResponseEntity.status(HttpStatus.OK).body(categoryService.getCategoryById(catsId, from, size));
+    @GetMapping("/categories/{catId}")
+    public ResponseEntity<CategoryDto> getCategory(@PathVariable Long catId) {
+        return ResponseEntity.status(HttpStatus.OK).body(categoryService.getCategoryById(catId));
     }
 }
