@@ -1,14 +1,14 @@
-package ru.practicum.ewm.categories.service;
+package ru.practicum.ewm.category.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import ru.practicum.ewm.categories.dto.CategoryDto;
-import ru.practicum.ewm.categories.dto.CategoryDtoRequest;
-import ru.practicum.ewm.categories.dto.CategoryMapper;
-import ru.practicum.ewm.categories.model.Category;
-import ru.practicum.ewm.categories.repository.CategoryRepository;
+import ru.practicum.ewm.category.dto.CategoryDto;
+import ru.practicum.ewm.category.dto.CategoryDtoRequest;
+import ru.practicum.ewm.category.dto.CategoryMapper;
+import ru.practicum.ewm.category.model.Category;
+import ru.practicum.ewm.category.repository.CategoryRepository;
 import ru.practicum.ewm.errors.NotFoundException;
 
 import javax.transaction.Transactional;
@@ -44,6 +44,7 @@ public class CategoryServiceImpl implements CategoryService {
         if (!categoryRepository.existsById(catId)) {
             throw new NotFoundException("Category with id = " + catId + " was not found");
         }
+        log.info("Категория с id = {} успешно обновлена", catId);
         return categoryMapper.toCategoryDto(categoryRepository.save(categoryMapper.toCategory(categoryDtoRequest)));
     }
 
@@ -57,7 +58,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     public CategoryDto getCategoryById(Long catId) {
-        log.info("Категория с id = {}, успешно получена", catId);
+        log.info("Поиск категории с id = {}", catId);
         return categoryMapper.toCategoryDto(getCategoryByIdNotMapping(catId));
     }
 

@@ -1,7 +1,9 @@
 package ru.practicum.ewm.errors;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -17,6 +19,7 @@ import java.util.List;
 public class ErrorHandler {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+    // Исключение данные не найдены
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiError notFoundException(final NotFoundException e) {
@@ -25,21 +28,26 @@ public class ErrorHandler {
         String stackTrace = out.toString();
         return new ApiError(HttpStatus.NOT_FOUND, "The required object was not found.", e.getMessage(),
                 List.of(stackTrace), LocalDateTime.now().format(formatter));
+    }
 
-//    @ExceptionHandler({ValidationException.class, MethodArgumentNotValidException.class})
-//    @ResponseStatus(HttpStatus.BAD_REQUEST)
-//    public ErrorResponse errorValidation(final ValidationException e) {
-//        return new ErrorResponse(
-//                e.getMessage()
-//        );
-//    }
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError errorValidationArgument(final MethodArgumentNotValidException e) {
+        StringWriter out = new StringWriter();
+        e.printStackTrace(new PrintWriter(out));
+        String stackTrace = out.toString();
+        return new ApiError(HttpStatus.BAD_REQUEST, "Incorrectly made request.", e.getMessage(),
+                List.of(stackTrace), LocalDateTime.now().format(formatter));
+    }
 
-//    @ExceptionHandler
-//    @ResponseStatus(HttpStatus.CONFLICT)
-//    public ErrorResponse errorEmailAlreadyExists(final ConflictException e) {
-//        return new ErrorResponse(
-//                e.getMessage()
-//        );
-//    }
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError errorConflictData(DataIntegrityViolationException e) {
+        StringWriter out = new StringWriter();
+        e.printStackTrace(new PrintWriter(out));
+        String stackTrace = out.toString();
+        return new ApiError(HttpStatus.CONFLICT, "Integrity constraint has been violated.",
+                e.getMessage(), List.of(stackTrace), LocalDateTime.now().format(formatter));
     }
 }
+

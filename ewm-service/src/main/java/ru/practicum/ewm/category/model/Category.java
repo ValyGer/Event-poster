@@ -1,4 +1,4 @@
-package ru.practicum.ewm.categories.model;
+package ru.practicum.ewm.category.model;
 
 import lombok.*;
 
@@ -16,5 +16,6 @@ public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    @Column(unique = true)
     private String name;
 }

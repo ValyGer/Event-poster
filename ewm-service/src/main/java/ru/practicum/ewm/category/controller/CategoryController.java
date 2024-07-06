@@ -1,13 +1,13 @@
-package ru.practicum.ewm.categories.controller;
+package ru.practicum.ewm.category.controller;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.ewm.categories.dto.CategoryDto;
-import ru.practicum.ewm.categories.dto.CategoryDtoRequest;
-import ru.practicum.ewm.categories.service.CategoryService;
+import ru.practicum.ewm.category.dto.CategoryDto;
+import ru.practicum.ewm.category.dto.CategoryDtoRequest;
+import ru.practicum.ewm.category.service.CategoryService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -35,7 +35,7 @@ public class CategoryController {
 
     @PatchMapping(value = "/admin/categories/{catId}")
     public ResponseEntity<CategoryDto> updateCategory(@PathVariable long catId,
-                                                      @RequestBody CategoryDtoRequest categoryDtoRequest) {
+                                                      @Valid @RequestBody CategoryDtoRequest categoryDtoRequest) {
         return ResponseEntity.ok().body(categoryService.updateCategory(catId, categoryDtoRequest));
     }
 
