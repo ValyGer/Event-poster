@@ -49,5 +49,15 @@ public class ErrorHandler {
         return new ApiError(HttpStatus.CONFLICT, "Integrity constraint has been violated.",
                 e.getMessage(), List.of(stackTrace), LocalDateTime.now().format(formatter));
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError errorConflictData(DataConflictRequest e) {
+        StringWriter out = new StringWriter();
+        e.printStackTrace(new PrintWriter(out));
+        String stackTrace = out.toString();
+        return new ApiError(HttpStatus.CONFLICT, "For the requested operation the conditions are not met.",
+                e.getMessage(), List.of(stackTrace), LocalDateTime.now().format(formatter));
+    }
 }
 

@@ -17,7 +17,7 @@ public interface EventMapper {
     @Mapping(target = "eventDate", dateFormat = "yyyy-MM-dd HH:mm:ss")
     @Mapping(source = "location.lat", target = "lat")
     @Mapping(source = "location.lon", target = "lon")
-    Event toNewEventForUpdate(NewEventDtoForUpdate newEventDtoForUpdate);
+    Event toUpdateEventUserRequest(UpdateEventUserRequest updateEventUserRequest);
 
     @Mapping(source = "category.id", target = "category")
     @Mapping(target = "eventDate", dateFormat = "yyyy-MM-dd HH:mm:ss")

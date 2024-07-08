@@ -17,11 +17,11 @@ public class EventFullDto {
     private String eventDate;
     private Long id;
     private UserShortDto initiator;
-    private boolean isPaid;
+    private boolean paid;
     private Location location;
     private Integer participantLimit;
     private String publishedOn;
-    private boolean isRequestModeration;
+    private boolean requestModeration;
     private String state;
     private String title;
     private Long confirmedRequests;

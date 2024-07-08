@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.event.dto.*;
+import ru.practicum.ewm.event.model.ParametersForRequest;
 import ru.practicum.ewm.event.service.EventService;
 
 import javax.validation.Valid;
@@ -35,7 +36,10 @@ public class EventController {
             @PathVariable Long userId,
             @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
             @Positive @RequestParam(required = false, defaultValue = "10") Integer size) {
-        return ResponseEntity.status(HttpStatus.OK).body(eventService.getAllEventOfUser(userId, from, size));
+
+        List<EventShortDto> listEvents = eventService.getAllEventOfUser(userId, from, size);
+
+        return ResponseEntity.status(HttpStatus.OK).body(listEvents);
     }
 
     @GetMapping(value = "/users/{userId}/events/{eventId}")
@@ -46,15 +50,15 @@ public class EventController {
     @PatchMapping(value = "/users/{userId}/events/{eventId}")
     public ResponseEntity<EventFullDto> updateEventByUser(
             @PathVariable Long userId, @PathVariable Long eventId,
-            @Valid @RequestBody NewEventDtoForUpdate newEventDtoForUpdate) {
-        return ResponseEntity.status(HttpStatus.OK).body(eventService.updateEvent(userId, eventId,
-                newEventDtoForUpdate));
+            @Valid @RequestBody UpdateEventUserRequest updateEventUserRequest) {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.updateEventByUser(userId, eventId,
+                updateEventUserRequest));
     }
 
     // Часть admin
 
     @GetMapping("/admin/events")
-    public List<EventFullDto> getAllEventsByAdmin(
+    public ResponseEntity<List<EventFullDto>> getAllEventsByAdmin(
             @RequestParam(required = false) List<Long> users,
             @RequestParam(required = false) List<String> states,
             @RequestParam(required = false) List<Long> categories,
@@ -73,10 +77,18 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getAllEventsByAdmin(parametersForRequest));
     }
 
-
+    @PatchMapping(value = "/admin/events/{eventId}")
+    public ResponseEntity<EventFullDto> updateEventByAdmin(
+            @PathVariable Long eventId,
+            @Valid @RequestBody UpdateEventAdminRequest updateEventAdminRequest) {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.updateEventByAdmin(eventId,
+                updateEventAdminRequest));
+    }
 
     // Часть public
 
     @GetMapping("/events")
-    public List<EventShortDto> getAllEvents
+    public List<EventShortDto> getAllEvents() {
+        return null;
+    }
 }

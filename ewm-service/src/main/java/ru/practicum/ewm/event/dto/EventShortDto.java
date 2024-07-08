@@ -15,7 +15,7 @@ public class EventShortDto {
     private String eventDate;
     private Long id;
     private UserShortDto initiator;
-    private boolean isPaid;
+    private boolean paid;
     private String title;
     private Long views;
 }

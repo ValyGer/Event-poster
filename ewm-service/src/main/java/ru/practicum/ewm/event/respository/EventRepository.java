@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import ru.practicum.ewm.event.model.Event;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
@@ -17,6 +18,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "order by ev.id desc")
     List<Event>  findEventsOfUser(Long userId, PageRequest pageRequest);
 
-    Event findEventByIdAndInitiatorId(Long userId, Long eventId);
+    Optional<Event> findByIdAndInitiatorId(Long userId, Long eventId);
+
 
 }
