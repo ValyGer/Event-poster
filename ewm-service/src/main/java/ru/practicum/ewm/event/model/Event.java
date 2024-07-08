@@ -31,13 +31,18 @@ public class Event {
     @ManyToOne
     @JoinColumn(name = "initiator_id", nullable = false)
     private User initiator;
-    private boolean paid;
+    @Column(name = "paid")
+    private boolean isPaid;
+    @Column(name = "loc_lat")
+    private Float lat;
+    @Column(name = "loc_lon")
+    private Float lon;
     @Column(name = "participant_limit")
     private Integer participantLimit;
     @Column(name = "published_on")
     private LocalDateTime publishedOn;
     @Column(name = "request_moderation")
-    private boolean requestModeration;
+    private boolean isRequestModeration;
     @Enumerated(EnumType.STRING)
     private EventState state;
     private String title;
