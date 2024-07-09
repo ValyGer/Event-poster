@@ -130,26 +130,6 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toEventFullDto(eventUpdate);
     }
 
-    // Вспомогательная функция обновления статуса
-    private void updateStateOfEventByUser(String stateAction, Event eventSaved) {
-        StateActionForUser stateActionForUser;
-        try {
-            stateActionForUser = StateActionForUser.valueOf(stateAction);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid parameter stateAction");
-        }
-        switch (stateActionForUser) {
-            case SEND_TO_REVIEW:
-                eventSaved.setState(EventState.PENDING);
-                break;
-            case CANCEL_REVIEW:
-                eventSaved.setState(EventState.CANCELED);
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + stateAction);
-        }
-    }
-
 
     // Часть admin
 
@@ -208,7 +188,31 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toEventFullDto(eventUpdate);
     }
 
-// Вспомогательная функция обновления статуса и время публикации
+    // Часть public
+
+
+    // Вспомогательная часть
+    // Вспомогательная функция обновления статуса
+    private void updateStateOfEventByUser(String stateAction, Event eventSaved) {
+        StateActionForUser stateActionForUser;
+        try {
+            stateActionForUser = StateActionForUser.valueOf(stateAction);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid parameter stateAction");
+        }
+        switch (stateActionForUser) {
+            case SEND_TO_REVIEW:
+                eventSaved.setState(EventState.PENDING);
+                break;
+            case CANCEL_REVIEW:
+                eventSaved.setState(EventState.CANCELED);
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + stateAction);
+        }
+    }
+
+    // Вспомогательная функция обновления статуса и время публикации
     private void updateStateOfEventByAdmin(String stateAction, Event eventSaved) {
         StateActionForAdmin stateActionForAdmin;
         try {
@@ -235,6 +239,14 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    // Часть public
+    // Получение event по id
+    public Event getEventById(Long eventId) {
+        return eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event with ID = " + eventId + " was not found"));
+    }
+
+    public void addRequestToEvent(Event event) {
+        eventRepository.save(event);
+    }
 }
 

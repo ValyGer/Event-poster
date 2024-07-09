@@ -28,4 +28,11 @@ public class Request {
     private User requester;
     @Enumerated(value = EnumType.STRING)
     private RequestStatus status;
+
+    public Request(Event event, User requester) {
+        this.createdOn = LocalDateTime.now();
+        this.event = event;
+        this.requester = requester;
+        this.status = RequestStatus.PENDING;
+    }
 }

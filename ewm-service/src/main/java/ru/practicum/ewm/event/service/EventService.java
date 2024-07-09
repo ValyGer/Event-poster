@@ -22,4 +22,11 @@ public interface EventService {
     List<EventFullDto> getAllEventsByAdmin(ParametersForRequest parametersForRequest);
 
     EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest updateEventAdminRequest);
+
+    // Часть private
+
+    // Вспомогательная часть
+    Event getEventById(Long eventId);
+
+    void addRequestToEvent(Event event);
 }
