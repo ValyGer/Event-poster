@@ -14,7 +14,7 @@ public class ParticipationRequestDto {
 
     private long id;
     @NotNull
-    private String create;
+    private String created;
     @NotNull
     private long event;
     @NotNull

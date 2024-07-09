@@ -3,10 +3,7 @@ package ru.practicum.ewm.event.dto;
 import lombok.*;
 import ru.practicum.ewm.event.model.Location;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 
 @Getter
 @Setter
@@ -14,13 +11,13 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @NoArgsConstructor
 public class NewEvenDto {
-    @NotNull
+    @NotBlank
     @Size(min = 20, max = 2000, message = "The annotation field must be between 20 and 2000 characters long.")
     private String annotation;
     @NotNull
     @Positive
     private Long category;
-    @NotNull
+    @NotBlank
     @Size(min = 20, max = 7000, message = "The description field must be between 20 and 7000 characters long.")
     private String description;
     @NotNull

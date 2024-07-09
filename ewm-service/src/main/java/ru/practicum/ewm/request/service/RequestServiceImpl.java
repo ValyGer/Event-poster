@@ -49,7 +49,7 @@ public class RequestServiceImpl implements RequestService {
                     "the event has reached the limit of requests for participation");
 
         Request request = new Request(event, user);
-        if ((event.getParticipantLimit() != 0) || !event.isRequestModeration()) {
+        if ((event.getParticipantLimit() == 0) || event.isRequestModeration()) {
             request.setStatus(RequestStatus.CONFIRMED);
             event.setConfirmedRequests(event.getConfirmedRequests() + 1);
             eventService.addRequestToEvent(event);

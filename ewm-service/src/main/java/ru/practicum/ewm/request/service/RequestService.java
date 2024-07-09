@@ -7,6 +7,8 @@ import java.util.List;
 public interface RequestService {
 
     ParticipationRequestDto createRequest(long userId, long eventId);
+
     List<ParticipationRequestDto> getAllRequestByUser(long userId);
+
     ParticipationRequestDto cancellationRequest(long userId, long requestId);
 }
