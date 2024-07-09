@@ -7,11 +7,9 @@ import org.springframework.stereotype.Service;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.service.CategoryService;
 import ru.practicum.ewm.errors.DataConflictRequest;
+import ru.practicum.ewm.errors.NotFoundException;
 import ru.practicum.ewm.event.dto.*;
-import ru.practicum.ewm.event.model.Event;
-import ru.practicum.ewm.event.model.EventState;
-import ru.practicum.ewm.event.model.ParametersForRequest;
-import ru.practicum.ewm.event.model.StateActionForUser;
+import ru.practicum.ewm.event.model.*;
 import ru.practicum.ewm.event.respository.EventRepository;
 import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.service.UserService;
@@ -85,7 +83,7 @@ public class EventServiceImpl implements EventService {
         if (optEventSaved.isPresent()) {
             eventSaved = optEventSaved.get();
         } else {
-            throw new DataConflictRequest("The required object was not found.");
+            throw new NotFoundException("Event with ID = " + eventId + " was not found");
         }
 
         Event eventNew = eventMapper.toUpdateEventUserRequest(updateEventUserRequest);
@@ -96,7 +94,7 @@ public class EventServiceImpl implements EventService {
             eventSaved.setEventDate((eventNew.getEventDate()));
         }
         if (updateEventUserRequest.getStateAction() != null) {
-            updateStateOfEvent(updateEventUserRequest.getStateAction(), eventSaved);
+            updateStateOfEventByUser(updateEventUserRequest.getStateAction(), eventSaved);
         }
         if (eventNew.getAnnotation() != null) {
             eventSaved.setAnnotation(eventNew.getAnnotation());
@@ -133,7 +131,7 @@ public class EventServiceImpl implements EventService {
     }
 
     // Вспомогательная функция обновления статуса
-    private void updateStateOfEvent(String stateAction, Event eventSaved) {
+    private void updateStateOfEventByUser(String stateAction, Event eventSaved) {
         StateActionForUser stateActionForUser;
         try {
             stateActionForUser = StateActionForUser.valueOf(stateAction);
@@ -161,7 +159,82 @@ public class EventServiceImpl implements EventService {
 
     @Transactional
     public EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest updateEventAdminRequest) {
-        return null;
+        Optional<Event> optEventSaved = eventRepository.findById(eventId);
+        Event eventSaved;
+        if (optEventSaved.isPresent()) {
+            eventSaved = optEventSaved.get();
+        } else {
+            throw new NotFoundException("Event with ID = " + eventId + " was not found");
+        }
+
+        Event eventNew = eventMapper.toUpdateEventAdminRequest(updateEventAdminRequest);
+        if (eventNew.getEventDate() != null) {
+            eventSaved.setEventDate((eventNew.getEventDate()));
+        }
+        if (updateEventAdminRequest.getStateAction() != null) {
+            updateStateOfEventByAdmin(updateEventAdminRequest.getStateAction(), eventSaved);
+        }
+        if (eventNew.getAnnotation() != null) {
+            eventSaved.setAnnotation(eventNew.getAnnotation());
+        }
+        if (eventNew.getCategory().getId() != 0) {
+            eventSaved.setCategory(eventNew.getCategory());
+        }
+        if (eventNew.getDescription() != null) {
+            eventSaved.setDescription(eventNew.getDescription());
+        }
+        if (eventNew.getLat() != null) {
+            eventSaved.setLat(eventNew.getLat());
+        }
+        if (eventNew.getLon() != null) {
+            eventSaved.setLon(eventNew.getLon());
+        }
+        if (eventNew.getParticipantLimit() != null) {
+            eventSaved.setParticipantLimit(eventSaved.getParticipantLimit());
+        }
+        if (eventNew.isPaid() != eventSaved.isPaid()) {
+            eventSaved.setPaid(eventNew.isPaid());
+        }
+        if (eventNew.isRequestModeration() != eventSaved.isRequestModeration()) {
+            eventSaved.setRequestModeration(eventNew.isRequestModeration());
+        }
+        if (eventNew.getTitle() != null) {
+            eventSaved.setTitle((eventNew.getTitle()));
+        }
+
+        Event eventUpdate = eventRepository.save(eventSaved);
+// добавить статистику просмотров
+        log.info("Событие ID = {} успешно обновлено от имени администратора", eventId);
+        return eventMapper.toEventFullDto(eventUpdate);
     }
 
+// Вспомогательная функция обновления статуса и время публикации
+    private void updateStateOfEventByAdmin(String stateAction, Event eventSaved) {
+        StateActionForAdmin stateActionForAdmin;
+        try {
+            stateActionForAdmin = StateActionForAdmin.valueOf(stateAction);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid parameter stateAction");
+        }
+        switch (stateActionForAdmin) {
+            case REJECT_EVENT:
+                if (eventSaved.getState().equals(EventState.PUBLISHED)) {
+                    throw new IllegalArgumentException("The event has already been published.");
+                }
+                eventSaved.setState(EventState.CANCELED);
+                break;
+            case PUBLISH_EVENT:
+                if (!eventSaved.getState().equals(EventState.PENDING)) {
+                    throw new IllegalArgumentException("Cannot publish the event because it's not in the right state: PUBLISHED");
+                }
+                eventSaved.setState(EventState.PUBLISHED);
+                eventSaved.setPublishedOn(LocalDateTime.now());
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + stateAction);
+        }
+    }
+
+    // Часть public
 }
+
