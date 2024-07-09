@@ -7,7 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.event.dto.*;
-import ru.practicum.ewm.event.model.ParametersForRequest;
+import ru.practicum.ewm.event.model.EventState;
+import ru.practicum.ewm.event.model.ParametersForRequestAdmin;
+import ru.practicum.ewm.event.model.ParametersForRequestPublic;
 import ru.practicum.ewm.event.service.EventService;
 
 import javax.validation.Valid;
@@ -66,15 +68,16 @@ public class EventController {
             @RequestParam("end") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
             @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
             @Positive @RequestParam(required = false, defaultValue = "10") Integer size) {
-        ParametersForRequest parametersForRequest = new ParametersForRequest(
-                users,
-                states,
-                categories,
-                rangeStart,
-                rangeEnd,
-                from,
-                size);
-        return ResponseEntity.status(HttpStatus.OK).body(eventService.getAllEventsByAdmin(parametersForRequest));
+        ParametersForRequestAdmin parametersForRequestAdmin = ParametersForRequestAdmin.builder()
+                .users(users)
+                .states(states)
+                .categories(categories)
+                .rangeStart(rangeStart)
+                .rangeEnd(rangeEnd)
+                .from(from)
+                .size(size)
+                .build();
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getAllEventsByAdmin(parametersForRequestAdmin));
     }
 
     @PatchMapping(value = "/admin/events/{eventId}")
@@ -88,7 +91,28 @@ public class EventController {
     // Часть public
 
     @GetMapping("/events")
-    public List<EventShortDto> getAllEvents() {
-        return null;
+    public ResponseEntity<List<EventShortDto>> getAllEvents(
+                    @RequestParam(required = false) String text,
+                    @RequestParam(required = false) List<Long> categories,
+                    @RequestParam(required = false) Boolean paid,
+                    @RequestParam(defaultValue = "0") long lat,
+                    @RequestParam(defaultValue = "0") long lon,
+                    @RequestParam(required = false) String rangeStart,
+                    @RequestParam(required = false) String rangeEnd,
+                    @RequestParam(defaultValue = "false") boolean onlyAvailable,
+                    @RequestParam(defaultValue = "EVENT_DATE") String sort,
+                    @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
+                    @Positive @RequestParam(required = false, defaultValue = "10") Integer size) {
+        ParametersForRequestPublic parametersForRequestPublic = ParametersForRequestPublic.builder()
+                .text(text)
+                .categories(categories)
+                .paid(paid)
+                .rangeStart(rangeStart)
+                .rangeEnd(rangeEnd)
+                .onlyAvailable(onlyAvailable)
+                .from(from)
+                .size(size)
+                .build();
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getAllEventsByUser(parametersForRequestPublic));
     }
 }

@@ -1,5 +1,6 @@
 package ru.practicum.ewm.event.service;
 
+import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +18,7 @@ import ru.practicum.ewm.user.service.UserService;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -133,7 +135,7 @@ public class EventServiceImpl implements EventService {
 
     // Часть admin
 
-    public List<EventFullDto> getAllEventsByAdmin(ParametersForRequest parametersForRequest) {
+    public List<EventFullDto> getAllEventsByAdmin(ParametersForRequestAdmin parametersForRequestAdmin) {
         return null;
     }
 
@@ -189,6 +191,38 @@ public class EventServiceImpl implements EventService {
     }
 
     // Часть public
+
+    public List<EventShortDto> getAllEventsByUser(ParametersForRequestPublic request) {
+
+        //формируем условие выборки
+        BooleanExpression conditions = makeEventsQueryConditionsForPublic(request);
+
+        //настройка размера страницы и типа сортировки
+        PageRequest pageRequest = PageRequest.of(
+                request.getFrom() / request.getSize(), request.getSize());
+
+        //запрашиваем события из базы
+        List<Event> events = eventRepository.findAll(conditions, pageRequest).toList();
+
+        //запрашиваем количество одобренных заявок на участие в каждом событии
+        Map<Long, Long> eventToRequestsCount = getEventRequests(events);
+
+        //Запрашиваем количество просмотров каждого события
+        ----------------------------------------------
+        //Функция формирования ответа, объединяет события и статистику просмотров
+        List<EventShortDto> eventsShortDto = eventMapper.specificMapper()
+
+
+
+
+
+
+
+
+
+
+        return null;
+    }
 
 
     // Вспомогательная часть
@@ -247,6 +281,11 @@ public class EventServiceImpl implements EventService {
 
     public void addRequestToEvent(Event event) {
         eventRepository.save(event);
+    }
+
+    // Выборка их базы
+    private static BooleanExpression makeEventsQueryConditionsForPublic(ParametersForRequestPublic request){
+        QEve
     }
 }
 

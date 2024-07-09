@@ -2,7 +2,8 @@ package ru.practicum.ewm.event.service;
 
 import ru.practicum.ewm.event.dto.*;
 import ru.practicum.ewm.event.model.Event;
-import ru.practicum.ewm.event.model.ParametersForRequest;
+import ru.practicum.ewm.event.model.ParametersForRequestAdmin;
+import ru.practicum.ewm.event.model.ParametersForRequestPublic;
 
 import java.util.List;
 
@@ -17,13 +18,17 @@ public interface EventService {
 
     EventFullDto updateEventByUser(Long userId, Long eventId, UpdateEventUserRequest updateEventUserRequest);
 
+
     // Часть admin
 
-    List<EventFullDto> getAllEventsByAdmin(ParametersForRequest parametersForRequest);
+    List<EventFullDto> getAllEventsByAdmin(ParametersForRequestAdmin parametersForRequestAdmin);
 
     EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest updateEventAdminRequest);
 
     // Часть private
+
+    List<EventShortDto> getAllEventsByUser(ParametersForRequestPublic parametersForRequestPublic);
+
 
     // Вспомогательная часть
     Event getEventById(Long eventId);
