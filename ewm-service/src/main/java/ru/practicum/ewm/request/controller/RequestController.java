@@ -30,8 +30,8 @@ public class RequestController {
     }
 
     @PatchMapping(value = "/{requestId}/cancel")
-    public ResponseEntity<ParticipationRequestDto> updateRequest(@PathVariable long userId,
+    public ResponseEntity<ParticipationRequestDto> cancellationRequest(@PathVariable long userId,
                                                                  @PathVariable long requestId) {
-        return ResponseEntity.status(HttpStatus.OK).body(requestService.updateRequest(userId, requestId));
+        return ResponseEntity.status(HttpStatus.OK).body(requestService.cancellationRequest(userId, requestId));
     }
 }

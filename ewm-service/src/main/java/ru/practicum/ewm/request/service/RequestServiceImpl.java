@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.errors.ConflictException;
+import ru.practicum.ewm.errors.NotFoundException;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.model.EventState;
 import ru.practicum.ewm.event.service.EventService;
@@ -66,7 +67,14 @@ public class RequestServiceImpl implements RequestService {
         return requests.stream().map(requestMapper::toParticipationRequestDto).collect(Collectors.toList());
     }
 
-    public ParticipationRequestDto updateRequest(long userId, long requestId) {
-        return null;
+    public ParticipationRequestDto cancellationRequest(long userId, long requestId) {
+        User user = userService.getUserById(userId);
+        Request request = requestRepository.findById(requestId)
+                .orElseThrow(() -> new NotFoundException("Request with id = " + requestId + " was not found"));
+        request.setStatus(RequestStatus.CANCELED);
+        request = requestRepository.save(request);
+        log.info("Бронирование пользователя с ID = {} на посещение мероприятия с ID = {} успешно отменено",
+                userId, requestId);
+        return requestMapper.toParticipationRequestDto(request);
     }
 }
