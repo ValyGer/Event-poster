@@ -8,9 +8,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.event.dto.*;
 import ru.practicum.ewm.event.model.EventState;
-import ru.practicum.ewm.event.model.ParametersForRequestAdmin;
-import ru.practicum.ewm.event.model.ParametersForRequestPublic;
 import ru.practicum.ewm.event.service.EventService;
+import ru.practicum.ewm.request.dto.EventRequestStatusUpdateRequest;
+import ru.practicum.ewm.request.dto.EventRequestStatusUpdateResult;
+import ru.practicum.ewm.request.dto.ParticipationRequestDto;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -57,6 +58,22 @@ public class EventController {
                 updateEventUserRequest));
     }
 
+    @GetMapping(value = "/users/{userId}/events/{eventId}/requests")
+    public ResponseEntity<List<ParticipationRequestDto>> getRequestEventByUser(@PathVariable Long userId,
+                                                                               @PathVariable Long eventId) {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getRequestEventByUser(userId, eventId));
+    }
+
+    @PatchMapping(value = "/users/{userId}/events/{eventId}/requests")
+    public ResponseEntity<EventRequestStatusUpdateResult> changeRequestEventStatus(
+            @PathVariable Long userId,
+            @PathVariable Long eventId,
+            @Valid @RequestBody EventRequestStatusUpdateRequest request) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(eventService.changeRequestEventStatus(userId, eventId, request));
+    }
+
+
     // Часть admin
 
     @GetMapping("/admin/events")
@@ -68,7 +85,7 @@ public class EventController {
             @RequestParam("end") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
             @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
             @Positive @RequestParam(required = false, defaultValue = "10") Integer size) {
-        ParametersForRequestAdmin parametersForRequestAdmin = ParametersForRequestAdmin.builder()
+        EventAdminParams eventAdminParams = EventAdminParams.builder()
                 .users(users)
                 .states(states)
                 .categories(categories)
@@ -77,7 +94,7 @@ public class EventController {
                 .from(from)
                 .size(size)
                 .build();
-        return ResponseEntity.status(HttpStatus.OK).body(eventService.getAllEventsByAdmin(parametersForRequestAdmin));
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getAllEventsByAdmin(eventAdminParams));
     }
 
     @PatchMapping(value = "/admin/events/{eventId}")
@@ -92,18 +109,17 @@ public class EventController {
 
     @GetMapping("/events")
     public ResponseEntity<List<EventShortDto>> getAllEvents(
-                    @RequestParam(required = false) String text,
-                    @RequestParam(required = false) List<Long> categories,
-                    @RequestParam(required = false) Boolean paid,
-                    @RequestParam(defaultValue = "0") long lat,
-                    @RequestParam(defaultValue = "0") long lon,
-                    @RequestParam(required = false) String rangeStart,
-                    @RequestParam(required = false) String rangeEnd,
-                    @RequestParam(defaultValue = "false") boolean onlyAvailable,
-                    @RequestParam(defaultValue = "EVENT_DATE") String sort,
-                    @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
-                    @Positive @RequestParam(required = false, defaultValue = "10") Integer size) {
-        ParametersForRequestPublic parametersForRequestPublic = ParametersForRequestPublic.builder()
+            @RequestParam(required = false) String text,
+            @RequestParam(required = false) List<Long> categories,
+            @RequestParam(required = false) Boolean paid,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
+            @RequestParam(defaultValue = "false") boolean onlyAvailable,
+            @RequestParam(defaultValue = "EVENT_DATE") String sort,
+            @PositiveOrZero @RequestParam(required = false, defaultValue = "0") int from,
+            @Positive @RequestParam(required = false, defaultValue = "10") int size) {
+        EventPublicParams eventPublicParams = EventPublicParams.builder()
+                .state(EventState.PUBLISHED)
                 .text(text)
                 .categories(categories)
                 .paid(paid)
@@ -112,7 +128,15 @@ public class EventController {
                 .onlyAvailable(onlyAvailable)
                 .from(from)
                 .size(size)
+                .sort(sort)
                 .build();
-        return ResponseEntity.status(HttpStatus.OK).body(eventService.getAllEventsByUser(parametersForRequestPublic));
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getAllEventsByUser(eventPublicParams));
     }
+
+    @GetMapping("/events/{id}")
+    public ResponseEntity<EventFullDto> getEventDtoById(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventDtoById(id));
+    }
+
+
 }

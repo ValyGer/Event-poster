@@ -12,6 +12,13 @@ import ru.practicum.ewm.errors.NotFoundException;
 import ru.practicum.ewm.event.dto.*;
 import ru.practicum.ewm.event.model.*;
 import ru.practicum.ewm.event.respository.EventRepository;
+import ru.practicum.ewm.request.dto.EventRequestStatusUpdateRequest;
+import ru.practicum.ewm.request.dto.EventRequestStatusUpdateResult;
+import ru.practicum.ewm.request.dto.ParticipationRequestDto;
+import ru.practicum.ewm.request.model.QRequest;
+import ru.practicum.ewm.request.model.Request;
+import ru.practicum.ewm.request.model.RequestStatus;
+import ru.practicum.ewm.request.service.RequestService;
 import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.service.UserService;
 
@@ -22,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 @Slf4j
@@ -30,6 +38,7 @@ public class EventServiceImpl implements EventService {
 
     private final EventRepository eventRepository;
     private final UserService userService;
+    private final RequestService requestService;
     private final CategoryService categoryService;
     private final EventMapper eventMapper;
 
@@ -133,10 +142,19 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toEventFullDto(eventUpdate);
     }
 
+    public List<ParticipationRequestDto> getRequestEventByUser(Long userId, Long eventId) {
+        return null;
+    }
+
+    public EventRequestStatusUpdateResult changeRequestEventStatus(Long userId, Long eventId,
+                                                            EventRequestStatusUpdateRequest request) {
+        return null;
+    }
+
 
     // Часть admin
 
-    public List<EventFullDto> getAllEventsByAdmin(ParametersForRequestAdmin parametersForRequestAdmin) {
+    public List<EventFullDto> getAllEventsByAdmin(EventAdminParams eventAdminParams) {
         return null;
     }
 
@@ -193,7 +211,7 @@ public class EventServiceImpl implements EventService {
 
     // Часть public
 
-    public List<EventShortDto> getAllEventsByUser(ParametersForRequestPublic request) {
+    public List<EventShortDto> getAllEventsByUser(EventPublicParams request) {
 
         //формируем условие выборки
         BooleanExpression conditions = makeEventsQueryConditionsForPublic(request);
@@ -203,30 +221,27 @@ public class EventServiceImpl implements EventService {
                 request.getFrom() / request.getSize(), request.getSize());
 
         //запрашиваем события из базы
-   //     List<Event> events = eventRepository.findAll(conditions, pageRequest).toList();
+        List<Event> events = eventRepository.findAll(conditions, pageRequest).toList();
 
         //запрашиваем количество одобренных заявок на участие в каждом событии
-   //     Map<Long, Long> eventToRequestsCount = getEventRequests(events);
+        Map<Long, Long> eventToRequestsCount = getEventRequests(events);
 
         //Запрашиваем количество просмотров каждого события
- //       ----------------------------------------------
+        //       ----------------------------------------------
         //Функция формирования ответа, объединяет события и статистику просмотров
-   //     List<EventShortDto> eventsShortDto = eventMapper.specificMapper()
-
-
-
-
-
-
-
-
+     //   List<EventShortDto> eventsShortDto = eventMapper.specificMapper()
 
 
         return null;
     }
 
 
-    // Вспомогательная часть
+    public EventFullDto getEventDtoById(Long id) {
+        Event event = getEventById(id);
+        return eventMapper.toEventFullDto(event);
+    }
+
+    // ----- Вспомогательная часть ----
     // Вспомогательная функция обновления статуса
     private void updateStateOfEventByUser(String stateAction, Event eventSaved) {
         StateActionForUser stateActionForUser;
@@ -284,13 +299,82 @@ public class EventServiceImpl implements EventService {
         eventRepository.save(event);
     }
 
-    // Выборка их базы
-    private static BooleanExpression makeEventsQueryConditionsForPublic(ParametersForRequestPublic request){
+    // Собираем условие по которому будем выбирать события из базы данных
+    private static BooleanExpression makeEventsQueryConditionsForPublic(EventPublicParams request) {
         QEvent event = QEvent.event;
 
         List<BooleanExpression> conditions = new ArrayList<>();
 
-        return null;
+        // поиск фрагмента текста в аннотации, описании и заголовке
+        if (!request.getText().isBlank()) {
+            String textToSearch = request.getText();
+            conditions.add(
+                    event.title.containsIgnoreCase(textToSearch)
+                            .or(event.annotation.containsIgnoreCase(textToSearch))
+                            .or(event.description.containsIgnoreCase(textToSearch))
+            );
+        }
+
+        // фильтрация по списку категорий
+        if (!request.getCategories().isEmpty()) {
+            conditions.add(
+                    event.category.id.in(request.getCategories())
+            );
+        }
+
+        // фильтрация по флагу платное/бесплатное событие
+        if (request.getPaid() != null) {
+            conditions.add(
+                    event.paid.eq(request.getPaid())
+            );
+        }
+
+        // фильтрация по временному диапазону, если не указано начало, то выборку производим начиная с настоящего
+        // времени только в будущее
+        LocalDateTime rangeStart;
+        if (request.getRangeStart() != null) {
+            rangeStart = request.getRangeStart();
+        } else {
+            rangeStart = LocalDateTime.now();
+        }
+        conditions.add(
+                event.eventDate.goe(rangeStart)
+        );
+
+        if (request.getRangeEnd() != null) {
+            conditions.add(
+                    event.eventDate.loe(request.getRangeEnd())
+            );
+        }
+
+        // фильтрация событий удовлетворяющих данному состоянию
+        if (request.getState() != null) {
+            conditions.add(
+                    QEvent.event.state.in(request.getState())
+            );
+        }
+
+        return conditions
+                .stream()
+                .reduce(BooleanExpression::and)
+                .get();
+    }
+
+    // Собираем количество одобренных заявок для каждого события
+    private Map<Long, Long> getEventRequests(List<Event> events) {
+        QRequest request = QRequest.request;
+
+        BooleanExpression condition = request.status.eq(RequestStatus.CONFIRMED).and(request.event.in(events));
+
+        Iterable<Request> reqs = requestService.findAll(condition);
+// Тут поправить надо!!
+        Map<Long, Long> getThis = StreamSupport
+                .stream(reqs.spliterator(), false)
+                .collect(Collectors.groupingBy(r -> r.getEvent().getId(), Collectors.counting()));
+
+        System.out.println(getThis);
+
+        return getThis;
     }
 }
 

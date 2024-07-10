@@ -1,7 +1,10 @@
 package ru.practicum.ewm.request.service;
 
-import lombok.RequiredArgsConstructor;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.errors.ConflictException;
 import ru.practicum.ewm.errors.NotFoundException;
@@ -21,13 +24,24 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
+@NoArgsConstructor(force = true)
 public class RequestServiceImpl implements RequestService {
 
     private final RequestRepository requestRepository;
     private final RequestMapper requestMapper;
     private final UserService userService;
     private final EventService eventService;
+
+    @Autowired
+    @Lazy
+    public RequestServiceImpl(RequestRepository requestRepository, RequestMapper requestMapper,
+                              UserService userService, EventService eventService) {
+        this.requestRepository = requestRepository;
+        this.requestMapper = requestMapper;
+        this.userService = userService;
+        this.eventService = eventService;
+    }
 
     public ParticipationRequestDto createRequest(long userId, long eventId) {
         User user = userService.getUserById(userId);
@@ -76,5 +90,9 @@ public class RequestServiceImpl implements RequestService {
         log.info("Бронирование пользователя с ID = {} на посещение мероприятия с ID = {} успешно отменено",
                 userId, requestId);
         return requestMapper.toParticipationRequestDto(request);
+    }
+
+    public Iterable<Request> findAll(BooleanExpression conditions) {
+        return requestRepository.findAll(conditions);
     }
 }
