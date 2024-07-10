@@ -17,6 +17,7 @@ import ru.practicum.ewm.user.service.UserService;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -202,15 +203,15 @@ public class EventServiceImpl implements EventService {
                 request.getFrom() / request.getSize(), request.getSize());
 
         //запрашиваем события из базы
-        List<Event> events = eventRepository.findAll(conditions, pageRequest).toList();
+   //     List<Event> events = eventRepository.findAll(conditions, pageRequest).toList();
 
         //запрашиваем количество одобренных заявок на участие в каждом событии
-        Map<Long, Long> eventToRequestsCount = getEventRequests(events);
+   //     Map<Long, Long> eventToRequestsCount = getEventRequests(events);
 
         //Запрашиваем количество просмотров каждого события
-        ----------------------------------------------
+ //       ----------------------------------------------
         //Функция формирования ответа, объединяет события и статистику просмотров
-        List<EventShortDto> eventsShortDto = eventMapper.specificMapper()
+   //     List<EventShortDto> eventsShortDto = eventMapper.specificMapper()
 
 
 
@@ -285,7 +286,11 @@ public class EventServiceImpl implements EventService {
 
     // Выборка их базы
     private static BooleanExpression makeEventsQueryConditionsForPublic(ParametersForRequestPublic request){
-        QEve
+        QEvent event = QEvent.event;
+
+        List<BooleanExpression> conditions = new ArrayList<>();
+
+        return null;
     }
 }
 
