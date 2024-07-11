@@ -137,6 +137,4 @@ public class EventController {
     public ResponseEntity<EventFullDto> getEventDtoById(@PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventDtoById(id));
     }
-
-
 }

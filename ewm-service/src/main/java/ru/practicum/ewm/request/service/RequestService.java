@@ -15,4 +15,6 @@ public interface RequestService {
     ParticipationRequestDto cancellationRequest(long userId, long requestId);
 
     Iterable<Request> findAll(BooleanExpression conditions);
+
+    List<Request> getAllByEventId(Long eventId);
 }

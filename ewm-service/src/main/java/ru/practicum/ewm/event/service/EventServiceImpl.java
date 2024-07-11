@@ -15,6 +15,7 @@ import ru.practicum.ewm.event.respository.EventRepository;
 import ru.practicum.ewm.request.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.ewm.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.ewm.request.dto.ParticipationRequestDto;
+import ru.practicum.ewm.request.dto.RequestMapper;
 import ru.practicum.ewm.request.model.QRequest;
 import ru.practicum.ewm.request.model.Request;
 import ru.practicum.ewm.request.model.RequestStatus;
@@ -24,10 +25,7 @@ import ru.practicum.ewm.user.service.UserService;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -41,6 +39,7 @@ public class EventServiceImpl implements EventService {
     private final RequestService requestService;
     private final CategoryService categoryService;
     private final EventMapper eventMapper;
+    private final RequestMapper requestMapper;
 
     // Часть private
 
@@ -143,11 +142,15 @@ public class EventServiceImpl implements EventService {
     }
 
     public List<ParticipationRequestDto> getRequestEventByUser(Long userId, Long eventId) {
-        return null;
+        userService.getUserById(userId);
+        getEventById(eventId);
+        List<Request> requests = requestService.getAllByEventId(eventId);
+        log.info("Получен список заявок на участие в событии с ID = {} пользователя с ID = {}", eventId, userId);
+        return requests.stream().map(requestMapper::toParticipationRequestDto).collect(Collectors.toList());
     }
 
     public EventRequestStatusUpdateResult changeRequestEventStatus(Long userId, Long eventId,
-                                                            EventRequestStatusUpdateRequest request) {
+                                                                   EventRequestStatusUpdateRequest request) {
         return null;
     }
 
@@ -209,6 +212,7 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toEventFullDto(eventUpdate);
     }
 
+
     // Часть public
 
     public List<EventShortDto> getAllEventsByUser(EventPublicParams request) {
@@ -228,18 +232,24 @@ public class EventServiceImpl implements EventService {
 
         //Запрашиваем количество просмотров каждого события
         //       ----------------------------------------------
-        //Функция формирования ответа, объединяет события и статистику просмотров
-     //   List<EventShortDto> eventsShortDto = eventMapper.specificMapper()
 
+        List<EventShortDto> eventsShortDto = events.stream().map(eventMapper::toEventShortDto).collect(Collectors.toList());
+        for (EventShortDto eventShortDto : eventsShortDto) {
+            eventShortDto.setConfirmedRequests(eventToRequestsCount.get(eventShortDto.getId()));
+        }
 
-        return null;
+        if (request.getSort().equals(SortType.VIEWS.toString())) {
+            return eventsShortDto.stream().sorted(new EventSortByViews()).collect(Collectors.toList());
+        } else {
+            return eventsShortDto.stream().sorted(new EventSortByEventDate()).collect(Collectors.toList());
+        }
     }
-
 
     public EventFullDto getEventDtoById(Long id) {
         Event event = getEventById(id);
         return eventMapper.toEventFullDto(event);
     }
+
 
     // ----- Вспомогательная часть ----
     // Вспомогательная функция обновления статуса
@@ -367,14 +377,26 @@ public class EventServiceImpl implements EventService {
         BooleanExpression condition = request.status.eq(RequestStatus.CONFIRMED).and(request.event.in(events));
 
         Iterable<Request> reqs = requestService.findAll(condition);
-// Тут поправить надо!!
-        Map<Long, Long> getThis = StreamSupport
+        return StreamSupport
                 .stream(reqs.spliterator(), false)
                 .collect(Collectors.groupingBy(r -> r.getEvent().getId(), Collectors.counting()));
+    }
 
-        System.out.println(getThis);
+    public static class EventSortByViews implements Comparator<EventShortDto> {
 
-        return getThis;
+        @Override
+        public int compare(EventShortDto o1, EventShortDto o2) {
+            return Long.compare(o1.getViews(), o2.getViews());
+        }
+    }
+
+    public static class EventSortByEventDate implements Comparator<EventShortDto> {
+
+        @Override
+        public int compare(EventShortDto o1, EventShortDto o2) {
+            return o1.getEventDate().compareTo(o2.getEventDate());
+        }
     }
 }
+
 

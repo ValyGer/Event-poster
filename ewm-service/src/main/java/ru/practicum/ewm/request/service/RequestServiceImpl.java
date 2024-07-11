@@ -95,4 +95,8 @@ public class RequestServiceImpl implements RequestService {
     public Iterable<Request> findAll(BooleanExpression conditions) {
         return requestRepository.findAll(conditions);
     }
+
+    public List<Request> getAllByEventId(Long eventId) {
+        return requestRepository.findAllByEventId(eventId);
+    }
 }
