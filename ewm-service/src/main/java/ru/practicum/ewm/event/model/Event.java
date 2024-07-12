@@ -32,7 +32,7 @@ public class Event {
     @JoinColumn(name = "initiator_id", nullable = false)
     private User initiator;
     @Column(name = "paid")
-    private boolean paid;
+    private Boolean paid;
     @Column(name = "loc_lat")
     private Float lat;
     @Column(name = "loc_lon")
@@ -42,7 +42,7 @@ public class Event {
     @Column(name = "published_on")
     private LocalDateTime publishedOn;
     @Column(name = "request_moderation")
-    private boolean requestModeration;
+    private Boolean requestModeration;
     @Enumerated(EnumType.STRING)
     private EventState state;
     private String title;

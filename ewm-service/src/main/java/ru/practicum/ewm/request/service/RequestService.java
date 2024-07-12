@@ -17,4 +17,8 @@ public interface RequestService {
     Iterable<Request> findAll(BooleanExpression conditions);
 
     List<Request> getAllByEventId(Long eventId);
+
+    List<Request> getAllByRequestIdIn(List<Long> requestsId);
+
+    List<Request> saveAll(List<Request> requests);
 }

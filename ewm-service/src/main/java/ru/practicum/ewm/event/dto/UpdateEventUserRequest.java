@@ -21,10 +21,10 @@ public class UpdateEventUserRequest {
     private String description;
     private String eventDate;
     private Location location;
-    private boolean paid;
+    private Boolean paid;
     @PositiveOrZero
     private Integer participantLimit;
-    private boolean requestModeration;
+    private Boolean requestModeration;
     private String stateAction;
     @Size(min = 3, max = 120, message = "The title field must be between 3 and 120 characters long.")
     private String title;

@@ -63,7 +63,7 @@ public class RequestServiceImpl implements RequestService {
                     "the event has reached the limit of requests for participation");
 
         Request request = new Request(event, user);
-        if ((event.getParticipantLimit() == 0) || event.isRequestModeration()) {
+        if ((event.getParticipantLimit() == 0) || (event.getRequestModeration() == null)) {
             request.setStatus(RequestStatus.CONFIRMED);
             event.setConfirmedRequests(event.getConfirmedRequests() + 1);
             eventService.addRequestToEvent(event);
@@ -98,5 +98,13 @@ public class RequestServiceImpl implements RequestService {
 
     public List<Request> getAllByEventId(Long eventId) {
         return requestRepository.findAllByEventId(eventId);
+    }
+
+    public List<Request> getAllByRequestIdIn(List<Long> requestsId) {
+        return requestRepository.findAllByIdIn(requestsId);
+    }
+
+    public List<Request> saveAll(List<Request> requests) {
+        return requestRepository.saveAll(requests);
     }
 }

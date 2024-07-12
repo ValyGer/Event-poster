@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.service.CategoryService;
+import ru.practicum.ewm.errors.ConflictException;
 import ru.practicum.ewm.errors.DataConflictRequest;
 import ru.practicum.ewm.errors.NotFoundException;
 import ru.practicum.ewm.event.dto.*;
@@ -125,11 +126,11 @@ public class EventServiceImpl implements EventService {
         if (eventNew.getParticipantLimit() != null) {
             eventSaved.setParticipantLimit(eventSaved.getParticipantLimit());
         }
-        if (eventNew.isPaid() != eventSaved.isPaid()) {
-            eventSaved.setPaid(eventNew.isPaid());
+        if (eventNew.getPaid() != null) {
+            eventSaved.setPaid(eventNew.getPaid());
         }
-        if (eventNew.isRequestModeration() != eventSaved.isRequestModeration()) {
-            eventSaved.setRequestModeration(eventNew.isRequestModeration());
+        if (eventNew.getRequestModeration() != null) {
+            eventSaved.setRequestModeration(eventNew.getRequestModeration());
         }
         if (eventNew.getTitle() != null) {
             eventSaved.setTitle((eventNew.getTitle()));
@@ -149,16 +150,94 @@ public class EventServiceImpl implements EventService {
         return requests.stream().map(requestMapper::toParticipationRequestDto).collect(Collectors.toList());
     }
 
+    @Transactional
     public EventRequestStatusUpdateResult changeRequestEventStatus(Long userId, Long eventId,
-                                                                   EventRequestStatusUpdateRequest request) {
-        return null;
+                                                                   EventRequestStatusUpdateRequest requestUpdate) {
+        User user = userService.getUserById(userId);
+        Event event = getEventById(eventId);
+        if (event.getInitiator().getId() != userId) {
+            throw new RuntimeException("Пользователь с ID = " + userId + " не является инициатором события с ID = " + eventId);
+        }
+
+        List<Request> requests = requestService.getAllByRequestIdIn(requestUpdate.getRequestIds()); // получаем список запросов на одобрение
+        RequestStatus newStatus = RequestStatus.valueOf(requestUpdate.getStatus()); // получаем значение нового статуса
+        Integer countOfRequest = requestUpdate.getRequestIds().size(); // находим количество новых заявок на одобрение
+
+        for (Request request : requests) {
+            if (!request.getStatus().equals(RequestStatus.PENDING)) {
+                throw new ConflictException("Изменить статус можно только у ожидающей подтверждения заявки на " +
+                        "участие");
+            }
+        }
+
+        List<ParticipationRequestDto> confirmedRequests = new ArrayList<>();
+        List<ParticipationRequestDto> rejectedRequests = new ArrayList<>();
+
+        switch (newStatus) {
+            case CONFIRMED:
+                if ((event.getParticipantLimit() == 0) ||
+                        ((event.getConfirmedRequests() + countOfRequest.longValue()) < event.getParticipantLimit()) ||
+                        (!event.getRequestModeration())) {
+                    requests.forEach(request -> request.setStatus(RequestStatus.CONFIRMED));
+                    event.setConfirmedRequests(event.getConfirmedRequests() + countOfRequest);
+                    for (Request request : requests) {
+                        confirmedRequests.add(requestMapper.toParticipationRequestDto(request));
+                    }
+                } else if (event.getConfirmedRequests() >= event.getParticipantLimit()) {
+                    throw new ConflictException("Достигнут лимит по заявкам на данное событие");
+                } else {
+                    for (Request request : requests) {
+                        if (event.getConfirmedRequests() < event.getParticipantLimit()) {
+                            request.setStatus(RequestStatus.CONFIRMED);
+                            event.setConfirmedRequests(event.getConfirmedRequests() + 1L);
+                            confirmedRequests.add(requestMapper.toParticipationRequestDto(request));
+                        } else {
+                            request.setStatus(RequestStatus.REJECTED);
+                            rejectedRequests.add(requestMapper.toParticipationRequestDto(request));
+                        }
+                    }
+                }
+                break;
+            case REJECTED:
+                for (Request request : requests) {
+                    request.setStatus(RequestStatus.REJECTED);
+                    rejectedRequests.add(requestMapper.toParticipationRequestDto(request));
+                }
+                break;
+        }
+        eventRepository.save(event);
+        requestService.saveAll(requests);
+        log.info("Статусы заявок успешно обновлены");
+        return new EventRequestStatusUpdateResult(confirmedRequests, rejectedRequests);
     }
 
 
     // Часть admin
 
     public List<EventFullDto> getAllEventsByAdmin(EventAdminParams eventAdminParams) {
-        return null;
+
+        //формируем условие выборки
+        BooleanExpression conditions = makeEventsQueryConditionsForAdmin(eventAdminParams);
+
+        //настройка размера страницы
+        PageRequest pageRequest = PageRequest.of(
+                eventAdminParams.getFrom() / eventAdminParams.getSize(), eventAdminParams.getSize());
+
+        //запрашиваем события из базы
+        List<Event> events = eventRepository.findAll(conditions, pageRequest).toList();
+
+        //запрашиваем количество одобренных заявок на участие в каждом событии
+        Map<Long, Long> eventToRequestsCount = getEventRequests(events);
+
+        //Запрашиваем количество просмотров каждого события
+        //       ----------------------------------------------
+
+        List<EventFullDto> eventsFullDto = events.stream().map(eventMapper::toEventFullDto).collect(Collectors.toList());
+        for (EventFullDto eventFullDto : eventsFullDto) {
+            eventFullDto.setConfirmedRequests(eventToRequestsCount.get(eventFullDto.getId()));
+        }
+
+        return eventsFullDto;
     }
 
     @Transactional
@@ -194,13 +273,13 @@ public class EventServiceImpl implements EventService {
             eventSaved.setLon(eventNew.getLon());
         }
         if (eventNew.getParticipantLimit() != null) {
-            eventSaved.setParticipantLimit(eventSaved.getParticipantLimit());
+            eventSaved.setParticipantLimit(eventNew.getParticipantLimit());
         }
-        if (eventNew.isPaid() != eventSaved.isPaid()) {
-            eventSaved.setPaid(eventNew.isPaid());
+        if (eventNew.getPaid() != null) {
+            eventSaved.setPaid(eventNew.getPaid());
         }
-        if (eventNew.isRequestModeration() != eventSaved.isRequestModeration()) {
-            eventSaved.setRequestModeration(eventNew.isRequestModeration());
+        if (eventNew.getRequestModeration() != null) {
+            eventSaved.setRequestModeration(eventNew.getRequestModeration());
         }
         if (eventNew.getTitle() != null) {
             eventSaved.setTitle((eventNew.getTitle()));
@@ -309,7 +388,7 @@ public class EventServiceImpl implements EventService {
         eventRepository.save(event);
     }
 
-    // Собираем условие по которому будем выбирать события из базы данных
+    // Собираем условие по которому будем выбирать события из базы данных для публичного запроса
     private static BooleanExpression makeEventsQueryConditionsForPublic(EventPublicParams request) {
         QEvent event = QEvent.event;
 
@@ -382,6 +461,7 @@ public class EventServiceImpl implements EventService {
                 .collect(Collectors.groupingBy(r -> r.getEvent().getId(), Collectors.counting()));
     }
 
+    // Компаратор для сортировки по количеству просмотров
     public static class EventSortByViews implements Comparator<EventShortDto> {
 
         @Override
@@ -390,12 +470,64 @@ public class EventServiceImpl implements EventService {
         }
     }
 
+    // Компаратор для сортировки по дате события
     public static class EventSortByEventDate implements Comparator<EventShortDto> {
 
         @Override
         public int compare(EventShortDto o1, EventShortDto o2) {
             return o1.getEventDate().compareTo(o2.getEventDate());
         }
+    }
+
+    // Собираем условие по которому будем выбирать события из базы данных для запроса администратора
+    private static BooleanExpression makeEventsQueryConditionsForAdmin(EventAdminParams request) {
+        QEvent event = QEvent.event;
+
+        List<BooleanExpression> conditions = new ArrayList<>();
+
+        // фильтрация по списку пользователь
+        if (!request.getUsers().isEmpty()) {
+            conditions.add(
+                    event.initiator.id.in(request.getUsers())
+            );
+        }
+
+        // фильтрация событий по статусу
+//        if (request.getStates() != null) {
+//            conditions.add(
+//                    QEvent.event.state.(request.getStates())
+//            );
+//        }
+
+        // фильтрация по списку категорий
+        if (!request.getCategories().isEmpty()) {
+            conditions.add(
+                    event.category.id.in(request.getCategories())
+            );
+        }
+
+        // фильтрация по временному диапазону, если не указано начало, то выборку производим начиная с настоящего
+        // времени только в будущее
+        LocalDateTime rangeStart;
+        if (request.getRangeStart() != null) {
+            rangeStart = request.getRangeStart();
+        } else {
+            rangeStart = LocalDateTime.now();
+        }
+        conditions.add(
+                event.eventDate.goe(rangeStart)
+        );
+
+        if (request.getRangeEnd() != null) {
+            conditions.add(
+                    event.eventDate.loe(request.getRangeEnd())
+            );
+        }
+
+        return conditions
+                .stream()
+                .reduce(BooleanExpression::and)
+                .get();
     }
 }
 
