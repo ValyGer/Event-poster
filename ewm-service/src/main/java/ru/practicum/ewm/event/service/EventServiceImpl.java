@@ -41,6 +41,7 @@ public class EventServiceImpl implements EventService {
     private final CategoryService categoryService;
     private final EventMapper eventMapper;
     private final RequestMapper requestMapper;
+    private final EventStatisticService eventStatisticService;
 
     // Часть private
 
@@ -49,7 +50,14 @@ public class EventServiceImpl implements EventService {
         userService.getUserById(userId); //Проверка пользователя
         List<Event> events = eventRepository.findEventsOfUser(userId, PageRequest.of(from / size, size));
         eventsOfUser = events.stream().map(eventMapper::toEventShortDto).collect(Collectors.toList());
-// добавить просмотры!!!!
+        Map<Long, Long> views = eventStatisticService.getEventsViews(events.stream()
+                .map(Event::getId)
+                .collect(Collectors.toList()));
+
+        System.out.println(views);
+
+
+
         log.info("Получение всех событий пользователя с ID = {}", userId);
         return eventsOfUser;
     }
@@ -325,7 +333,9 @@ public class EventServiceImpl implements EventService {
     }
 
     public EventFullDto getEventDtoById(Long id) {
-        Event event = getEventById(id);
+        Map<Long, Long> views = eventStatisticService.getEventsViews(List.of(id));
+        Event event = eventRepository.findByIdAndState(id, EventState.PUBLISHED)
+                .orElseThrow(() -> new NotFoundException("Event must be published"));
         return eventMapper.toEventFullDto(event);
     }
 
@@ -528,6 +538,10 @@ public class EventServiceImpl implements EventService {
                 .stream()
                 .reduce(BooleanExpression::and)
                 .get();
+    }
+
+    public List<Event> getAllEventsByListId(List<Long> eventsId){
+        return eventRepository.findAllById(eventsId);
     }
 }
 

@@ -6,9 +6,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.stereotype.Repository;
 import ru.practicum.ewm.event.model.Event;
+import ru.practicum.ewm.event.model.EventState;
 
 import java.util.List;
 import java.util.Optional;
+
+import static ru.practicum.ewm.event.model.EventState.PUBLISHED;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPredicateExecutor<Event> {
@@ -20,4 +23,6 @@ public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPre
     List<Event> findEventsOfUser(Long userId, PageRequest pageRequest);
 
     Optional<Event> findByIdAndInitiatorId(Long userId, Long eventId);
+
+    Optional<Event> findByIdAndState(Long id, EventState state);
 }

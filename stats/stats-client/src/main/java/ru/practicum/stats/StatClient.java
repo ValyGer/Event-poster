@@ -1,5 +1,7 @@
 package ru.practicum.stats;
 
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,7 +22,7 @@ public class StatClient extends BaseClient {
     public StatClient(@Value("${stats-service.url}") String serverUrl, RestTemplateBuilder builder) {
         super(
                 builder
-                        .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
+                        .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + ""))
                         .requestFactory(HttpComponentsClientHttpRequestFactory::new)
                         .build()
         );

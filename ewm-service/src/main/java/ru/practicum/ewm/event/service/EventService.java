@@ -40,4 +40,6 @@ public interface EventService {
     Event getEventById(Long eventId);
 
     void addRequestToEvent(Event event);
+
+    List<Event> getAllEventsByListId(List<Long> eventsId);
 }
