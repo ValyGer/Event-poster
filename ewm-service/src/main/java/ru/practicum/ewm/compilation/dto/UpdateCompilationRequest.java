@@ -2,7 +2,6 @@ package ru.practicum.ewm.compilation.dto;
 
 import lombok.*;
 
-import javax.persistence.Entity;
 import javax.validation.constraints.Size;
 import java.util.List;
 

@@ -24,7 +24,7 @@ public class CompilationController {
     @PostMapping(value = "/admin/compilations")
     public ResponseEntity<CompilationDto> createCompilation(@Valid @RequestBody
                                                             NewCompilationDto newCompilationDto) {
-        return ResponseEntity.status(HttpStatus.OK).body(compilationService.createCompilation(newCompilationDto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(compilationService.createCompilation(newCompilationDto));
     }
 
     @DeleteMapping("/admin/compilations/{compId}")
