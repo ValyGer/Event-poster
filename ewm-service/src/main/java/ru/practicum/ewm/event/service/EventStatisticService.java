@@ -4,11 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import ru.practicum.stats.StatClient;
-import ru.practicum.stats.ViewStats;
 
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
@@ -25,8 +24,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EventStatisticService {
 
-   // private final StatClient statClient;
-    private final Gson gson;
+    @Autowired
+    private final StatClient statClient;
+    Gson gson = new Gson();
 
     public Map<Long, Long> getEventsViews(List<Long> eventsId) {
         Map<Long, Long> eventsViews = new HashMap<>();
@@ -39,12 +39,12 @@ public class EventStatisticService {
             uris.add("EVENT_URI" + eventId);
         }
 
-//        ResponseEntity<Object> response = statClient.getStats(
-//                LocalDateTime.now().minusDays(30).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
-//                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
-//                uris,
-//                true
-//        );
+        ResponseEntity<Object> response = statClient.getStats(
+                LocalDateTime.now().minusDays(30).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                uris,
+                true
+        );
 
         Object body = null;//response.getBody();
         if (body != null) {
