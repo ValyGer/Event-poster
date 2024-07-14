@@ -31,22 +31,23 @@ public class EventController {
     @PostMapping(value = "/users/{userId}/events")
     public ResponseEntity<EventFullDto> createEvent(@PathVariable Long userId,
                                                     @Valid @RequestBody NewEvenDto newEvenDto) {
+        System.out.println("привет Post /users/{userId}/events");
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.createEvent(userId, newEvenDto));
     }
 
-    @GetMapping(value = "/users/{userId}/events")
+    @GetMapping("/users/{userId}/events")
     public ResponseEntity<List<EventShortDto>> getAllEventForUser(
             @PathVariable Long userId,
             @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
             @Positive @RequestParam(required = false, defaultValue = "10") Integer size) {
-
         List<EventShortDto> listEvents = eventService.getAllEventOfUser(userId, from, size);
-
+        System.out.println("привет Get /users/{userId}/events");
         return ResponseEntity.status(HttpStatus.OK).body(listEvents);
     }
 
-    @GetMapping(value = "/users/{userId}/events/{eventId}")
+    @GetMapping("/users/{userId}/events/{eventId}")
     public ResponseEntity<EventFullDto> getEventForUserById(@PathVariable Long userId, @PathVariable Long eventId) {
+        System.out.println("привет Get /users/{userId}/events/{eventId}");
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventOfUserById(userId, eventId));
     }
 
@@ -54,13 +55,16 @@ public class EventController {
     public ResponseEntity<EventFullDto> updateEventByUser(
             @PathVariable Long userId, @PathVariable Long eventId,
             @Valid @RequestBody UpdateEventUserRequest updateEventUserRequest) {
+        System.out.println("привет Patch /users/{userId}/events/{eventId}");
+
         return ResponseEntity.status(HttpStatus.OK).body(eventService.updateEventByUser(userId, eventId,
                 updateEventUserRequest));
     }
 
-    @GetMapping(value = "/users/{userId}/events/{eventId}/requests")
+    @GetMapping("/users/{userId}/events/{eventId}/requests")
     public ResponseEntity<List<ParticipationRequestDto>> getRequestEventByUser(@PathVariable Long userId,
                                                                                @PathVariable Long eventId) {
+        System.out.println("привет get /users/{userId}/events/{eventId}/requests");
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getRequestEventByUser(userId, eventId));
     }
 
@@ -69,6 +73,8 @@ public class EventController {
             @PathVariable Long userId,
             @PathVariable Long eventId,
             @Valid @RequestBody EventRequestStatusUpdateRequest request) {
+        System.out.println("привет patch /users/{userId}/events/{eventId}/requests");
+
         return ResponseEntity.status(HttpStatus.OK)
                 .body(eventService.changeRequestEventStatus(userId, eventId, request));
     }
@@ -81,8 +87,8 @@ public class EventController {
             @RequestParam(required = false) List<Long> users,
             @RequestParam(required = false) List<String> states,
             @RequestParam(required = false) List<Long> categories,
-            @RequestParam("start") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
-            @RequestParam("end") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
             @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
             @Positive @RequestParam(required = false, defaultValue = "10") Integer size) {
         EventAdminParams eventAdminParams = EventAdminParams.builder()
@@ -94,6 +100,7 @@ public class EventController {
                 .from(from)
                 .size(size)
                 .build();
+        System.out.println("привет get /admin/events");
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getAllEventsByAdmin(eventAdminParams));
     }
 
@@ -101,6 +108,9 @@ public class EventController {
     public ResponseEntity<EventFullDto> updateEventByAdmin(
             @PathVariable Long eventId,
             @Valid @RequestBody UpdateEventAdminRequest updateEventAdminRequest) {
+
+        System.out.println("привет patch /admin/events/{eventId}");
+
         return ResponseEntity.status(HttpStatus.OK).body(eventService.updateEventByAdmin(eventId,
                 updateEventAdminRequest));
     }
@@ -130,11 +140,15 @@ public class EventController {
                 .size(size)
                 .sort(sort)
                 .build();
+        System.out.println("привет get /events");
+
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getAllEventsByUser(eventPublicParams));
     }
 
     @GetMapping("/events/{id}")
     public ResponseEntity<EventFullDto> getEventDtoById(@PathVariable Long id) {
+        System.out.println("привет get /events/{id}");
+
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventDtoById(id));
     }
 }

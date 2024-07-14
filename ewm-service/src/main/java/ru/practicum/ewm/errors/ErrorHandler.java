@@ -59,5 +59,6 @@ public class ErrorHandler {
         return new ApiError(HttpStatus.CONFLICT, "For the requested operation the conditions are not met.",
                 e.getMessage(), List.of(stackTrace), LocalDateTime.now().format(formatter));
     }
+
 }
 

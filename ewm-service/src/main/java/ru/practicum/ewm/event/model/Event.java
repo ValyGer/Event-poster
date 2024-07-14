@@ -2,10 +2,12 @@ package ru.practicum.ewm.event.model;
 
 import lombok.*;
 import ru.practicum.ewm.category.model.Category;
+import ru.practicum.ewm.compilation.model.Compilation;
 import ru.practicum.ewm.user.model.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -48,6 +50,6 @@ public class Event {
     private String title;
     @Column(name = "confirmed_requests")
     private Long confirmedRequests;
-//    @ManyToMany(mappedBy = "events")
-//    private List<Compilation> compilations;
+    @ManyToMany(mappedBy = "events")
+    private List<Compilation> compilations;
 }

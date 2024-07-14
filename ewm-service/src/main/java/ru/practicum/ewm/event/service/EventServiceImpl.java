@@ -1,8 +1,10 @@
 package ru.practicum.ewm.event.service;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.category.model.Category;
@@ -32,9 +34,8 @@ import java.util.stream.StreamSupport;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+@NoArgsConstructor(force = true)
 public class EventServiceImpl implements EventService {
-
     private final EventRepository eventRepository;
     private final UserService userService;
     private final RequestService requestService;
@@ -42,6 +43,20 @@ public class EventServiceImpl implements EventService {
     private final EventMapper eventMapper;
     private final RequestMapper requestMapper;
     private final EventStatisticService eventStatisticService;
+
+    @Autowired
+    @Lazy
+    public EventServiceImpl(EventRepository eventRepository, UserService userService, RequestService requestService,
+                            CategoryService categoryService, EventMapper eventMapper, RequestMapper requestMapper,
+                            EventStatisticService eventStatisticService) {
+        this.eventRepository = eventRepository;
+        this.userService = userService;
+        this.requestService = requestService;
+        this.categoryService = categoryService;
+        this.eventMapper = eventMapper;
+        this.requestMapper = requestMapper;
+        this.eventStatisticService = eventStatisticService;
+    }
 
     // Часть private
 
@@ -57,7 +72,6 @@ public class EventServiceImpl implements EventService {
         System.out.println(views);
 
 
-
         log.info("Получение всех событий пользователя с ID = {}", userId);
         return eventsOfUser;
     }
@@ -67,6 +81,11 @@ public class EventServiceImpl implements EventService {
         User initiator = userService.getUserById(userId); //Проверка пользователя
         Category category = categoryService.getCategoryByIdNotMapping(newEvenDto.getCategory()); // Проверка категории
         Event event = eventMapper.toEvent(newEvenDto);
+
+        if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+            throw new ConflictException("Field: eventDate. Error: должно содержать дату, которая еще не наступила. " +
+                    "Value: 2020-12-31T15:10:05");
+        }
 
         event.setInitiator(initiator);
         event.setCategory(category);
@@ -265,6 +284,7 @@ public class EventServiceImpl implements EventService {
         if (updateEventAdminRequest.getStateAction() != null) {
             updateStateOfEventByAdmin(updateEventAdminRequest.getStateAction(), eventSaved);
         }
+
         if (eventNew.getAnnotation() != null) {
             eventSaved.setAnnotation(eventNew.getAnnotation());
         }
@@ -503,11 +523,12 @@ public class EventServiceImpl implements EventService {
         }
 
         // фильтрация событий по статусу
-//        if (request.getStates() != null) {
-//            conditions.add(
-//                    QEvent.event.state.(request.getStates())
-//            );
-//        }
+        if (request.getStates() != null) {
+            List<EventState> states = request.getStates().stream().map(EventState::valueOf).collect(Collectors.toList());
+            conditions.add(
+                    QEvent.event.state.in(states)
+            );
+        }
 
         // фильтрация по списку категорий
         if (!request.getCategories().isEmpty()) {
@@ -540,7 +561,7 @@ public class EventServiceImpl implements EventService {
                 .get();
     }
 
-    public List<Event> getAllEventsByListId(List<Long> eventsId){
+    public List<Event> getAllEventsByListId(List<Long> eventsId) {
         return eventRepository.findAllById(eventsId);
     }
 }
