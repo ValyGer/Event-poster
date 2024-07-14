@@ -25,13 +25,11 @@ public interface EventMapper {
     @Mapping(source = "location.lon", target = "lon")
     Event toUpdateEventAdminRequest(UpdateEventAdminRequest updateEventAdminRequest);
 
-    @Mapping(source = "category.id", target = "category")
     @Mapping(target = "eventDate", dateFormat = "yyyy-MM-dd HH:mm:ss")
     @Mapping(source = "lat", target = "location.lat")
     @Mapping(source = "lon", target = "location.lon")
     EventFullDto toEventFullDto(Event event);
 
-    @Mapping(source = "category.id", target = "category")
     @Mapping(target = "eventDate", dateFormat = "yyyy-MM-dd HH:mm:ss")
     EventShortDto toEventShortDto(Event event);
 }

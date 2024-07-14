@@ -50,6 +50,6 @@ public class Event {
     private String title;
     @Column(name = "confirmed_requests")
     private Long confirmedRequests;
-    @ManyToMany(mappedBy = "events")
-    private List<Compilation> compilations;
+//    @ManyToMany(mappedBy = "events")
+//    private List<Compilation> compilations;
 }

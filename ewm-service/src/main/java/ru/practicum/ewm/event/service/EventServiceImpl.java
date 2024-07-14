@@ -374,9 +374,6 @@ public class EventServiceImpl implements EventService {
         //запрашиваем количество одобренных заявок на участие в каждом событии
         Map<Long, Long> eventToRequestsCount = getEventRequests(events);
 
-        //Запрашиваем количество просмотров каждого события
-        //       ----------------------------------------------
-
         List<EventShortDto> eventsShortDto = events.stream().map(eventMapper::toEventShortDto).collect(Collectors.toList());
 
         //Получаем и добавляем просмотры
