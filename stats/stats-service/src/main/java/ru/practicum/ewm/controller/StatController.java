@@ -1,4 +1,4 @@
-package ru.practicum.stats.controller;
+package ru.practicum.ewm.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,9 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.stats.EndpointHit;
-import ru.practicum.stats.ViewStats;
-import ru.practicum.stats.service.HitService;
+import ru.practicum.ewm.EndpointHit;
+import ru.practicum.ewm.ViewStats;
+import ru.practicum.ewm.service.HitService;
 
 import java.time.LocalDateTime;
 import java.util.List;

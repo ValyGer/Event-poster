@@ -1,4 +1,4 @@
-package ru.practicum.stats.model;
+package ru.practicum.ewm.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

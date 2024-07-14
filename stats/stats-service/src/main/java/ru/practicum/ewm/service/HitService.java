@@ -1,8 +1,8 @@
-package ru.practicum.stats.service;
+package ru.practicum.ewm.service;
 
 import org.springframework.http.HttpStatus;
-import ru.practicum.stats.EndpointHit;
-import ru.practicum.stats.ViewStats;
+import ru.practicum.ewm.EndpointHit;
+import ru.practicum.ewm.ViewStats;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -4,10 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import ru.practicum.stats.StatClient;
+import ru.practicum.ewm.StatClient;
+import ru.practicum.ewm.ViewStats;
 
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EventStatisticService {
 
-    @Autowired
     private final StatClient statClient;
     Gson gson = new Gson();
 
@@ -46,7 +45,7 @@ public class EventStatisticService {
                 true
         );
 
-        Object body = null;//response.getBody();
+        Object body = response.getBody();
         if (body != null) {
             String json = gson.toJson(body);
             Type typeToken = new TypeToken<List<ViewStats>>() {

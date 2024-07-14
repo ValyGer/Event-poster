@@ -65,13 +65,14 @@ public class EventServiceImpl implements EventService {
         userService.getUserById(userId); //Проверка пользователя
         List<Event> events = eventRepository.findEventsOfUser(userId, PageRequest.of(from / size, size));
         eventsOfUser = events.stream().map(eventMapper::toEventShortDto).collect(Collectors.toList());
+        //Получаем и добавляем просмотры
         Map<Long, Long> views = eventStatisticService.getEventsViews(events.stream()
                 .map(Event::getId)
                 .collect(Collectors.toList()));
-
-        System.out.println(views);
-
-
+        for (EventShortDto eventShortDto : eventsOfUser) {
+            eventShortDto.setViews(views.get(eventShortDto.getId()));
+        }
+        //
         log.info("Получение всех событий пользователя с ID = {}", userId);
         return eventsOfUser;
     }
@@ -109,7 +110,15 @@ public class EventServiceImpl implements EventService {
         } else {
             throw new DataConflictRequest("The required object was not found.");
         }
-// Добавить просмотры
+
+        //Получаем и добавляем просмотры
+        Map<Long, Long> views = eventStatisticService.getEventsViews(List.of(eventFullDto).stream()
+                .map(EventFullDto::getId)
+                .collect(Collectors.toList()));
+
+        eventFullDto.setViews(views.get(eventFullDto.getId()));
+        //
+
         log.info("Поиск события с ID = {}", eventId);
         return eventFullDto;
     }
@@ -164,15 +173,26 @@ public class EventServiceImpl implements EventService {
         }
 
         Event eventUpdate = eventRepository.save(eventSaved);
-// добавить статистику просмотров
+
+        //Получаем и добавляем просмотры
+        Map<Long, Long> views = eventStatisticService.getEventsViews(List.of(eventUpdate).stream()
+                .map(Event::getId)
+                .collect(Collectors.toList()));
+
+        EventFullDto eventFullDto = eventMapper.toEventFullDto(eventUpdate);
+        eventFullDto.setViews(views.get(eventFullDto.getId()));
+        //
+
         log.info("Событие ID = {} пользователя ID = {} успешно обновлено", eventId, userId);
-        return eventMapper.toEventFullDto(eventUpdate);
+        return eventFullDto;
     }
 
     public List<ParticipationRequestDto> getRequestEventByUser(Long userId, Long eventId) {
         userService.getUserById(userId);
         getEventById(eventId);
         List<Request> requests = requestService.getAllByEventId(eventId);
+
+
         log.info("Получен список заявок на участие в событии с ID = {} пользователя с ID = {}", eventId, userId);
         return requests.stream().map(requestMapper::toParticipationRequestDto).collect(Collectors.toList());
     }
@@ -264,6 +284,14 @@ public class EventServiceImpl implements EventService {
             eventFullDto.setConfirmedRequests(eventToRequestsCount.get(eventFullDto.getId()));
         }
 
+        //Получаем и добавляем просмотры
+        Map<Long, Long> views = eventStatisticService.getEventsViews(eventsFullDto.stream()
+                .map(EventFullDto::getId)
+                .collect(Collectors.toList()));
+        for (EventFullDto eventFullDto : eventsFullDto) {
+            eventFullDto.setViews(views.get(eventFullDto.getId()));
+        }
+        //
         return eventsFullDto;
     }
 
@@ -314,9 +342,18 @@ public class EventServiceImpl implements EventService {
         }
 
         Event eventUpdate = eventRepository.save(eventSaved);
-// добавить статистику просмотров
+
+        //Получаем и добавляем просмотры
+        Map<Long, Long> views = eventStatisticService.getEventsViews(List.of(eventUpdate).stream()
+                .map(Event::getId)
+                .collect(Collectors.toList()));
+
+        EventFullDto eventFullDto = eventMapper.toEventFullDto(eventUpdate);
+        eventFullDto.setViews(views.get(eventFullDto.getId()));
+        //
+
         log.info("Событие ID = {} успешно обновлено от имени администратора", eventId);
-        return eventMapper.toEventFullDto(eventUpdate);
+        return eventFullDto;
     }
 
 
@@ -341,6 +378,16 @@ public class EventServiceImpl implements EventService {
         //       ----------------------------------------------
 
         List<EventShortDto> eventsShortDto = events.stream().map(eventMapper::toEventShortDto).collect(Collectors.toList());
+
+        //Получаем и добавляем просмотры
+        Map<Long, Long> views = eventStatisticService.getEventsViews(eventsShortDto.stream()
+                .map(EventShortDto::getId)
+                .collect(Collectors.toList()));
+        for (EventShortDto eventShortDto : eventsShortDto) {
+            eventShortDto.setViews(views.get(eventShortDto.getId()));
+        }
+        //
+
         for (EventShortDto eventShortDto : eventsShortDto) {
             eventShortDto.setConfirmedRequests(eventToRequestsCount.get(eventShortDto.getId()));
         }
@@ -353,10 +400,16 @@ public class EventServiceImpl implements EventService {
     }
 
     public EventFullDto getEventDtoById(Long id) {
-        Map<Long, Long> views = eventStatisticService.getEventsViews(List.of(id));
         Event event = eventRepository.findByIdAndState(id, EventState.PUBLISHED)
                 .orElseThrow(() -> new NotFoundException("Event must be published"));
-        return eventMapper.toEventFullDto(event);
+
+        Map<Long, Long> views = eventStatisticService.getEventsViews(List.of(event).stream()
+                .map(Event::getId)
+                .collect(Collectors.toList()));
+        EventFullDto eventFullDto = eventMapper.toEventFullDto(event);
+        eventFullDto.setViews(views.get(eventFullDto.getId()));
+
+        return eventFullDto;
     }
 
 

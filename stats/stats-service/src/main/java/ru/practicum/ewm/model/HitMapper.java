@@ -1,8 +1,8 @@
-package ru.practicum.stats.model;
+package ru.practicum.ewm.model;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import ru.practicum.stats.EndpointHit;
+import ru.practicum.ewm.EndpointHit;
 
 @Mapper(componentModel = "spring")
 public interface HitMapper {
