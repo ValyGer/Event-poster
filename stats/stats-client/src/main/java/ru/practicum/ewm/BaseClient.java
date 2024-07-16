@@ -16,12 +16,12 @@ public class BaseClient {
         this.restTemplate = restTemplate;
     }
 
-    protected <T> ResponseEntity<Object> post(String path, @Nullable Map<String, Object> parameters, T body) {
-        return makeAndSendRequest(HttpMethod.POST, path, parameters, body);
-    }
-
     protected ResponseEntity<Object> get(String path, @Nullable Map<String, Object> parameters) {
         return makeAndSendRequest(HttpMethod.GET, path, parameters, null);
+    }
+
+    protected <T> ResponseEntity<Object> post(String path, T body) {
+        return makeAndSendRequest(HttpMethod.POST, path, null, body);
     }
 
     private <T> ResponseEntity<Object> makeAndSendRequest(HttpMethod method, String path,

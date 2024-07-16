@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NewCompilationDto {
+
     private Boolean pinned;
     @NotBlank
     @Size(min = 1, max = 50, message = "Длина должна быть от 1 до 50 символов")

@@ -13,6 +13,7 @@ import ru.practicum.ewm.user.repository.UserRepository;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,8 +51,11 @@ public class UserServiceImpl implements UserService {
     }
 
     public User getUserById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User with id = " + userId + " was not found"));
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isPresent()) {
+            return userOptional.get();
+        }
+        throw new NotFoundException("User with id = " + userId + " was not found");
     }
 
 }

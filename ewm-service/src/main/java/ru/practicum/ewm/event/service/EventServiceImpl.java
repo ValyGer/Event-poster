@@ -7,10 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import ru.practicum.ewm.EndpointHit;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.service.CategoryService;
 import ru.practicum.ewm.errors.ConflictException;
 import ru.practicum.ewm.errors.DataConflictRequest;
+import ru.practicum.ewm.errors.InvalidRequestException;
 import ru.practicum.ewm.errors.NotFoundException;
 import ru.practicum.ewm.event.dto.*;
 import ru.practicum.ewm.event.model.*;
@@ -26,6 +28,7 @@ import ru.practicum.ewm.request.service.RequestService;
 import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.service.UserService;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -139,6 +142,10 @@ public class EventServiceImpl implements EventService {
             throw new DataConflictRequest("Only pending or canceled events can be changed");
         }
         if (eventNew.getEventDate() != null) {
+            if (eventNew.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
+                throw new InvalidRequestException("The start date of the event to be modified must be no earlier " +
+                        "than one hour from the date of publication.");
+            }
             eventSaved.setEventDate((eventNew.getEventDate()));
         }
         if (updateEventUserRequest.getStateAction() != null) {
@@ -263,6 +270,8 @@ public class EventServiceImpl implements EventService {
 
     public List<EventFullDto> getAllEventsByAdmin(EventAdminParams eventAdminParams) {
 
+        System.out.println("привет1" + eventRepository.findAll());
+
         //формируем условие выборки
         BooleanExpression conditions = makeEventsQueryConditionsForAdmin(eventAdminParams);
 
@@ -272,6 +281,9 @@ public class EventServiceImpl implements EventService {
 
         //запрашиваем события из базы
         List<Event> events = eventRepository.findAll(conditions, pageRequest).toList();
+
+        System.out.println("привет2" + events);
+
 
         //запрашиваем количество одобренных заявок на участие в каждом событии
         Map<Long, Long> eventToRequestsCount = getEventRequests(events);
@@ -307,9 +319,17 @@ public class EventServiceImpl implements EventService {
 
         Event eventNew = eventMapper.toUpdateEventAdminRequest(updateEventAdminRequest);
         if (eventNew.getEventDate() != null) {
+            if (eventNew.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
+                throw new InvalidRequestException("The start date of the event to be modified must be no earlier " +
+                        "than one hour from the date of publication.");
+            }
             eventSaved.setEventDate((eventNew.getEventDate()));
         }
         if (updateEventAdminRequest.getStateAction() != null) {
+            if (!updateEventAdminRequest.getStateAction().equals(EventState.PENDING.toString())) {
+                throw new DataConflictRequest("Cannot publish the event because it's not in the right state: " +
+                        updateEventAdminRequest.getStateAction());
+            }
             updateStateOfEventByAdmin(updateEventAdminRequest.getStateAction(), eventSaved);
         }
 
@@ -357,9 +377,12 @@ public class EventServiceImpl implements EventService {
     }
 
 
+
+
     // Часть public
 
-    public List<EventShortDto> getAllEventsByUser(EventPublicParams request) {
+    public List<EventShortDto> getAllEventsByUser(EventPublicParams request, HttpServletRequest httpServletRequest) {
+
 
         //формируем условие выборки
         BooleanExpression conditions = makeEventsQueryConditionsForPublic(request);
@@ -396,7 +419,8 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    public EventFullDto getEventDtoById(Long id) {
+    public EventFullDto getEventDtoById(Long id, HttpServletRequest httpServletRequest) {
+
         Event event = eventRepository.findByIdAndState(id, EventState.PUBLISHED)
                 .orElseThrow(() -> new NotFoundException("Event must be published"));
 
@@ -408,6 +432,8 @@ public class EventServiceImpl implements EventService {
 
         return eventFullDto;
     }
+
+
 
 
     // ----- Вспомогательная часть ----
@@ -460,8 +486,11 @@ public class EventServiceImpl implements EventService {
 
     // Получение event по id
     public Event getEventById(Long eventId) {
-        return eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("Event with ID = " + eventId + " was not found"));
+        Optional<Event> eventOptional = eventRepository.findById(eventId);
+        if (eventOptional.isPresent()) {
+            return eventOptional.get();
+        }
+        throw new NotFoundException("Event with ID = " + eventId + " was not found");
     }
 
     public void addRequestToEvent(Event event) {
@@ -475,7 +504,7 @@ public class EventServiceImpl implements EventService {
         List<BooleanExpression> conditions = new ArrayList<>();
 
         // поиск фрагмента текста в аннотации, описании и заголовке
-        if (!request.getText().isBlank()) {
+        if (request.getText() != null && !request.getText().isBlank()) {
             String textToSearch = request.getText();
             conditions.add(
                     event.title.containsIgnoreCase(textToSearch)
@@ -485,7 +514,7 @@ public class EventServiceImpl implements EventService {
         }
 
         // фильтрация по списку категорий
-        if (!request.getCategories().isEmpty()) {
+        if (request.getCategories() != null && !request.getCategories().isEmpty()) {
             conditions.add(
                     event.category.id.in(request.getCategories())
             );
@@ -572,7 +601,7 @@ public class EventServiceImpl implements EventService {
             );
         }
 
-        // фильтрация событий по статусу
+     //    фильтрация событий по статусу
         if (request.getStates() != null) {
             List<EventState> states = request.getStates().stream().map(EventState::valueOf).collect(Collectors.toList());
             conditions.add(
@@ -587,8 +616,8 @@ public class EventServiceImpl implements EventService {
             );
         }
 
-        // фильтрация по временному диапазону, если не указано начало, то выборку производим начиная с настоящего
-        // времени только в будущее
+//         фильтрация по временному диапазону, если не указано начало, то выборку производим начиная с настоящего
+//         времени только в будущее
         LocalDateTime rangeStart;
         if (request.getRangeStart() != null) {
             rangeStart = request.getRangeStart();

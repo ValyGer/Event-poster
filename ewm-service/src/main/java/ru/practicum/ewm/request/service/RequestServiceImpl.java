@@ -19,12 +19,12 @@ import ru.practicum.ewm.request.repository.RequestRepository;
 import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.service.UserService;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-//@RequiredArgsConstructor
 @NoArgsConstructor(force = true)
 public class RequestServiceImpl implements RequestService {
 
@@ -43,9 +43,11 @@ public class RequestServiceImpl implements RequestService {
         this.eventService = eventService;
     }
 
-    public ParticipationRequestDto createRequest(long userId, long eventId) {
+    @Transactional
+    public ParticipationRequestDto createRequest(Long userId, Long eventId) {
         User user = userService.getUserById(userId);
         Event event = eventService.getEventById(eventId);
+
         List<Request> requests = requestRepository.findAllByRequesterIdAndEventId(userId, eventId);
 
         if (!requests.isEmpty()) {
@@ -74,14 +76,14 @@ public class RequestServiceImpl implements RequestService {
         return requestMapper.toParticipationRequestDto(request);
     }
 
-    public List<ParticipationRequestDto> getAllRequestByUser(long userId) {
+    public List<ParticipationRequestDto> getAllRequestByUser(Long userId) {
         User user = userService.getUserById(userId);
         List<Request> requests = requestRepository.findAllByRequesterId(userId);
         log.info("Поиск запросов на участие в событиях пользователя с ID = {}", userId);
         return requests.stream().map(requestMapper::toParticipationRequestDto).collect(Collectors.toList());
     }
 
-    public ParticipationRequestDto cancellationRequest(long userId, long requestId) {
+    public ParticipationRequestDto cancellationRequest(Long userId, Long requestId) {
         User user = userService.getUserById(userId);
         Request request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("Request with id = " + requestId + " was not found"));

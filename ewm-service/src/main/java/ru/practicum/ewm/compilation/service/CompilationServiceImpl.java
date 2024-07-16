@@ -107,7 +107,7 @@ public class CompilationServiceImpl implements CompilationService {
             List<EventShortDto> eventShortDtoList = eventList.stream().map(eventMapper::toEventShortDto).collect(Collectors.toList());
             for (EventShortDto eventShortDto : eventShortDtoList) {
                 if (views.get(eventShortDto.getId()) == null) {
-                    eventShortDto.setViews(views.get(0));
+                    eventShortDto.setViews(views.get(0L));
                 } else {
                     eventShortDto.setViews(views.get(eventShortDto.getId()));
                 }

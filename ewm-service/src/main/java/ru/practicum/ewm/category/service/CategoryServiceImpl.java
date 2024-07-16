@@ -13,9 +13,11 @@ import ru.practicum.ewm.errors.ConflictException;
 import ru.practicum.ewm.errors.NotFoundException;
 import ru.practicum.ewm.event.dto.EventAdminParams;
 import ru.practicum.ewm.event.service.EventService;
+import ru.practicum.ewm.user.model.User;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -66,7 +68,10 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     public Category getCategoryByIdNotMapping(Long catId) {
-        return categoryRepository.findById(catId)
-                .orElseThrow(() -> new NotFoundException("Category with id = " + catId + " was not found"));
+        Optional<Category> categoryOptional = categoryRepository.findById(catId);
+        if (categoryOptional.isPresent()) {
+            return categoryOptional.get();
+        }
+        throw new NotFoundException("Category with id = " + catId + " was not found");
     }
 }

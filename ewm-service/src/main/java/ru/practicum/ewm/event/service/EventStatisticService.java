@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import ru.practicum.ewm.EndpointHit;
 import ru.practicum.ewm.StatClient;
 import ru.practicum.ewm.ViewStats;
 
@@ -38,14 +39,14 @@ public class EventStatisticService {
             uris.add("EVENT_URI" + eventId);
         }
 
-        ResponseEntity<Object> response = statClient.getStats(
-                LocalDateTime.now().minusDays(30).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
-                uris,
-                true
-        );
+//        ResponseEntity<Object> response = statClient.getStats(
+//                LocalDateTime.now().minusDays(30).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+//                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+//                uris,
+//                true
+//        );
 
-        Object body = response.getBody();
+        Object body = null;//response.getBody();
         if (body != null) {
             String json = gson.toJson(body);
             Type typeToken = new TypeToken<List<ViewStats>>() {
@@ -61,4 +62,9 @@ public class EventStatisticService {
         }
         return eventsViews;
     }
+
+    public void addHit(EndpointHit endpointHit) {
+        statClient.addHit(endpointHit);
+    }
+
 }

@@ -17,7 +17,7 @@ import java.util.Map;
 public class StatClient extends BaseClient {
 
     @Autowired
-    public StatClient(@Value("${stats-service.url}") String serverUrl, RestTemplateBuilder builder) {
+    public StatClient(@Value("${stats-server.url}") String serverUrl, RestTemplateBuilder builder) {
         super(
                 builder
                         .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + ""))
@@ -38,6 +38,6 @@ public class StatClient extends BaseClient {
 
     public ResponseEntity<Object> addHit(EndpointHit endpointHit) {
         log.info("Выполнение запрос на добавление события вызова сервиса в статистику через модуль client");
-        return post("/hit", null, endpointHit);
+        return post("/hit", endpointHit);
     }
 }

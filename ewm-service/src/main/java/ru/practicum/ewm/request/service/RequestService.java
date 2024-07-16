@@ -8,11 +8,11 @@ import java.util.List;
 
 public interface RequestService {
 
-    ParticipationRequestDto createRequest(long userId, long eventId);
+    ParticipationRequestDto createRequest(Long userId, Long eventId);
 
-    List<ParticipationRequestDto> getAllRequestByUser(long userId);
+    List<ParticipationRequestDto> getAllRequestByUser(Long userId);
 
-    ParticipationRequestDto cancellationRequest(long userId, long requestId);
+    ParticipationRequestDto cancellationRequest(Long userId, Long requestId);
 
     Iterable<Request> findAll(BooleanExpression conditions);
 

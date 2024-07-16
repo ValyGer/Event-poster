@@ -6,17 +6,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.ewm.EndpointHit;
 import ru.practicum.ewm.event.dto.*;
 import ru.practicum.ewm.event.model.EventState;
 import ru.practicum.ewm.event.service.EventService;
+import ru.practicum.ewm.event.service.EventStatisticService;
 import ru.practicum.ewm.request.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.ewm.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.ewm.request.dto.ParticipationRequestDto;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
@@ -25,6 +29,8 @@ import java.util.List;
 public class EventController {
 
     private final EventService eventService;
+
+    private final EventStatisticService eventStatisticService;
 
     // Часть private
 
@@ -73,7 +79,6 @@ public class EventController {
 
 
     // Часть admin
-
     @GetMapping("/admin/events")
     public ResponseEntity<List<EventFullDto>> getAllEventsByAdmin(
             @RequestParam(required = false) List<Long> users,
@@ -115,7 +120,9 @@ public class EventController {
             @RequestParam(defaultValue = "false") boolean onlyAvailable,
             @RequestParam(defaultValue = "EVENT_DATE") String sort,
             @PositiveOrZero @RequestParam(required = false, defaultValue = "0") int from,
-            @Positive @RequestParam(required = false, defaultValue = "10") int size) {
+            @Positive @RequestParam(required = false, defaultValue = "10") int size,
+            HttpServletRequest httpServletRequest
+    ) {
         EventPublicParams eventPublicParams = EventPublicParams.builder()
                 .state(EventState.PUBLISHED)
                 .text(text)
@@ -128,11 +135,29 @@ public class EventController {
                 .size(size)
                 .sort(sort)
                 .build();
-        return ResponseEntity.status(HttpStatus.OK).body(eventService.getAllEventsByUser(eventPublicParams));
+
+        EndpointHit endpointHit = new EndpointHit(
+                "SERVICE_ID",
+                httpServletRequest.getRequestURI(),
+                httpServletRequest.getRemoteAddr(),
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        eventStatisticService.addHit(endpointHit);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(eventService.getAllEventsByUser(eventPublicParams, httpServletRequest));
     }
 
     @GetMapping("/events/{id}")
-    public ResponseEntity<EventFullDto> getEventDtoById(@PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventDtoById(id));
+    public ResponseEntity<EventFullDto> getEventDtoById(@PathVariable Long id,
+                                                        HttpServletRequest httpServletRequest) {
+
+        EndpointHit endpointHit = new EndpointHit(
+                "SERVICE_ID",
+                httpServletRequest.getRequestURI(),
+                httpServletRequest.getRemoteAddr(),
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        eventStatisticService.addHit(endpointHit);
+        System.out.println(httpServletRequest);
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventDtoById(id, httpServletRequest));
     }
 }
