@@ -13,18 +13,6 @@ public interface EventMapper {
     @Mapping(source = "location.lon", target = "lon")
     Event toEvent(NewEvenDto newEvenDto);
 
-    @Mapping(source = "category", target = "category.id")
-    @Mapping(target = "eventDate", dateFormat = "yyyy-MM-dd HH:mm:ss")
-    @Mapping(source = "location.lat", target = "lat")
-    @Mapping(source = "location.lon", target = "lon")
-    Event toUpdateEventUserRequest(UpdateEventUserRequest updateEventUserRequest);
-
-    @Mapping(source = "category", target = "category.id")
-    @Mapping(target = "eventDate", dateFormat = "yyyy-MM-dd HH:mm:ss")
-    @Mapping(source = "location.lat", target = "lat")
-    @Mapping(source = "location.lon", target = "lon")
-    Event toUpdateEventAdminRequest(UpdateEventAdminRequest updateEventAdminRequest);
-
     @Mapping(target = "eventDate", dateFormat = "yyyy-MM-dd HH:mm:ss")
     @Mapping(source = "lat", target = "location.lat")
     @Mapping(source = "lon", target = "location.lon")

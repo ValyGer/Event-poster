@@ -65,7 +65,7 @@ public class CompilationServiceImpl implements CompilationService {
                 new NotFoundException("Compilation with id = " + compId + " was not found"));
 
         List<Event> eventList = new ArrayList<>();
-        if (updateCompilationRequest.getEvents() != null & !updateCompilationRequest.getEvents().isEmpty()) {
+        if (updateCompilationRequest.getEvents() != null && !updateCompilationRequest.getEvents().isEmpty()) {
             eventList = eventService.getAllEventsByListId(updateCompilationRequest.getEvents());
             compilationSaved.setEvents(eventList);
         }

@@ -24,10 +24,10 @@ public class NewEvenDto {
     private String eventDate;
     @NotNull
     private Location location;
-    private Boolean paid;
+    private Boolean paid = false;
     @PositiveOrZero
-    private Integer participantLimit;
-    private Boolean requestModeration;
+    private Integer participantLimit = 0;
+    private Boolean requestModeration = true;
     @NotNull
     @Size(min = 3, max = 120, message = "The title field must be between 3 and 120 characters long.")
     private String title;

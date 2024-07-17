@@ -87,7 +87,8 @@ public class EventServiceImpl implements EventService {
         Event event = eventMapper.toEvent(newEvenDto);
 
         if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ConflictException("Field: eventDate. Error: должно содержать дату, которая еще не наступила.");
+            throw new InvalidRequestException("The date and time for which the event is scheduled cannot be earlier " +
+                    "than two hours from the current moment");
         }
 
         event.setInitiator(initiator);
@@ -126,8 +127,9 @@ public class EventServiceImpl implements EventService {
     }
 
     @Transactional
-    public EventFullDto updateEventByUser(Long userId, Long eventId, UpdateEventUserRequest updateEventUserRequest) {
+    public EventFullDto updateEventByUser(Long userId, Long eventId, UpdateEventUserRequest updateEvent) {
         userService.getUserById(userId); //Проверка пользователя
+
         Optional<Event> optEventSaved = eventRepository.findByIdAndInitiatorId(eventId, userId);
         Event eventSaved;
         if (optEventSaved.isPresent()) {
@@ -135,47 +137,38 @@ public class EventServiceImpl implements EventService {
         } else {
             throw new NotFoundException("Event with ID = " + eventId + " was not found");
         }
+        if (updateEvent.getEventDate() != null) {
+            updateEventData(updateEvent.getEventDate(), eventSaved);
+        }
+        if (updateEvent.getStateAction() != null) {
+            updateStateOfEventByUser(updateEvent.getStateAction(), eventSaved);
+        }
 
-        Event eventNew = eventMapper.toUpdateEventUserRequest(updateEventUserRequest);
-        if (eventSaved.getState().equals(EventState.PUBLISHED)) {
-            throw new DataConflictRequest("Only pending or canceled events can be changed");
+        if (updateEvent.getAnnotation() != null) {
+            eventSaved.setAnnotation(updateEvent.getAnnotation());
         }
-        if (eventNew.getEventDate() != null) {
-            if (eventNew.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
-                throw new InvalidRequestException("The start date of the event to be modified must be no earlier " +
-                        "than one hour from the date of publication.");
-            }
-            eventSaved.setEventDate((eventNew.getEventDate()));
+        if (updateEvent.getCategory() != null) {
+            Category category = categoryService.getCategoryByIdNotMapping(updateEvent.getCategory());
+            eventSaved.setCategory(category);
         }
-        if (updateEventUserRequest.getStateAction() != null) {
-            updateStateOfEventByUser(updateEventUserRequest.getStateAction(), eventSaved);
+        if (updateEvent.getDescription() != null) {
+            eventSaved.setDescription(updateEvent.getDescription());
         }
-        if (eventNew.getAnnotation() != null) {
-            eventSaved.setAnnotation(eventNew.getAnnotation());
+        if (updateEvent.getLocation() != null) {
+            eventSaved.setLat(updateEvent.getLocation().getLat());
+            eventSaved.setLon(updateEvent.getLocation().getLon());
         }
-        if (eventNew.getCategory().getId() != 0) {
-            eventSaved.setCategory(eventNew.getCategory());
-        }
-        if (eventNew.getDescription() != null) {
-            eventSaved.setDescription(eventNew.getDescription());
-        }
-        if (eventNew.getLat() != null) {
-            eventSaved.setLat(eventNew.getLat());
-        }
-        if (eventNew.getLon() != null) {
-            eventSaved.setLon(eventNew.getLon());
-        }
-        if (eventNew.getParticipantLimit() != null) {
+        if (updateEvent.getParticipantLimit() != null) {
             eventSaved.setParticipantLimit(eventSaved.getParticipantLimit());
         }
-        if (eventNew.getPaid() != null) {
-            eventSaved.setPaid(eventNew.getPaid());
+        if (updateEvent.getPaid() != null) {
+            eventSaved.setPaid(updateEvent.getPaid());
         }
-        if (eventNew.getRequestModeration() != null) {
-            eventSaved.setRequestModeration(eventNew.getRequestModeration());
+        if (updateEvent.getRequestModeration() != null) {
+            eventSaved.setRequestModeration(updateEvent.getRequestModeration());
         }
-        if (eventNew.getTitle() != null) {
-            eventSaved.setTitle((eventNew.getTitle()));
+        if (updateEvent.getTitle() != null) {
+            eventSaved.setTitle((updateEvent.getTitle()));
         }
 
         Event eventUpdate = eventRepository.save(eventSaved);
@@ -187,7 +180,6 @@ public class EventServiceImpl implements EventService {
 
         EventFullDto eventFullDto = eventMapper.toEventFullDto(eventUpdate);
         eventFullDto.setViews(views.get(eventFullDto.getId()));
-        //
 
         log.info("Событие ID = {} пользователя ID = {} успешно обновлено", eventId, userId);
         return eventFullDto;
