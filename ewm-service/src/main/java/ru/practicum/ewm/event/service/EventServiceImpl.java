@@ -261,8 +261,6 @@ public class EventServiceImpl implements EventService {
 
     public List<EventFullDto> getAllEventsByAdmin(EventAdminParams eventAdminParams) {
 
-        System.out.println("привет1" + eventRepository.findAll());
-
         //формируем условие выборки
         BooleanExpression conditions = makeEventsQueryConditionsForAdmin(eventAdminParams);
 
@@ -272,9 +270,6 @@ public class EventServiceImpl implements EventService {
 
         //запрашиваем события из базы
         List<Event> events = eventRepository.findAll(conditions, pageRequest).toList();
-
-        System.out.println("привет2" + events);
-
 
         //запрашиваем количество одобренных заявок на участие в каждом событии
         Map<Long, Long> eventToRequestsCount = getEventRequests(events);
@@ -570,14 +565,14 @@ public class EventServiceImpl implements EventService {
         List<BooleanExpression> conditions = new ArrayList<>();
 
         // фильтрация по списку пользователь
-        if (!request.getUsers().isEmpty()) {
+        if (request.getUsers() !=null && !request.getUsers().isEmpty()) {
             conditions.add(
                     event.initiator.id.in(request.getUsers())
             );
         }
 
         //    фильтрация событий по статусу
-        if (request.getStates() != null) {
+        if (request.getStates() != null && !request.getStates().isEmpty()) {
             List<EventState> states = request.getStates().stream().map(EventState::valueOf).collect(Collectors.toList());
             conditions.add(
                     QEvent.event.state.in(states)
@@ -585,7 +580,7 @@ public class EventServiceImpl implements EventService {
         }
 
         // фильтрация по списку категорий
-        if (!request.getCategories().isEmpty()) {
+        if (request.getCategories() != null && !request.getCategories().isEmpty()) {
             conditions.add(
                     event.category.id.in(request.getCategories())
             );
