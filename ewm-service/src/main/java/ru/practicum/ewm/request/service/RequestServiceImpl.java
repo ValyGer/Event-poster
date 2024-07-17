@@ -10,6 +10,7 @@ import ru.practicum.ewm.errors.ConflictException;
 import ru.practicum.ewm.errors.NotFoundException;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.model.EventState;
+import ru.practicum.ewm.event.respository.EventRepository;
 import ru.practicum.ewm.event.service.EventService;
 import ru.practicum.ewm.request.dto.ParticipationRequestDto;
 import ru.practicum.ewm.request.dto.RequestMapper;
@@ -19,7 +20,6 @@ import ru.practicum.ewm.request.repository.RequestRepository;
 import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.service.UserService;
 
-import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,14 +36,14 @@ public class RequestServiceImpl implements RequestService {
     @Autowired
     @Lazy
     public RequestServiceImpl(RequestRepository requestRepository, RequestMapper requestMapper,
-                              UserService userService, EventService eventService) {
+                              UserService userService,
+                              EventService eventService) {
         this.requestRepository = requestRepository;
         this.requestMapper = requestMapper;
         this.userService = userService;
         this.eventService = eventService;
     }
 
-    @Transactional
     public ParticipationRequestDto createRequest(Long userId, Long eventId) {
         User user = userService.getUserById(userId);
         Event event = eventService.getEventById(eventId);

@@ -39,14 +39,14 @@ public class EventStatisticService {
             uris.add("EVENT_URI" + eventId);
         }
 
-//        ResponseEntity<Object> response = statClient.getStats(
-//                LocalDateTime.now().minusDays(30).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
-//                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
-//                uris,
-//                true
-//        );
+        ResponseEntity<Object> response = statClient.getStats(
+                LocalDateTime.now().minusDays(30).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                uris,
+                true
+        );
 
-        Object body = null;//response.getBody();
+        Object body = response.getBody();
         if (body != null) {
             String json = gson.toJson(body);
             Type typeToken = new TypeToken<List<ViewStats>>() {

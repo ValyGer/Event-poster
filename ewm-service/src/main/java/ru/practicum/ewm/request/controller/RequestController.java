@@ -12,23 +12,22 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(path = "/users/{userId}/requests")
 public class RequestController {
 
     private final RequestService requestService;
 
-    @PostMapping
+    @PostMapping(value = "/users/{userId}/requests")
     public ResponseEntity<ParticipationRequestDto> createRequest(@PathVariable Long userId,
                                                                  @NotNull @RequestParam Long eventId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(requestService.createRequest(userId, eventId));
     }
 
-    @GetMapping
+    @GetMapping("/users/{userId}/requests")
     public ResponseEntity<List<ParticipationRequestDto>> getAllRequestByUser(@PathVariable Long userId) {
         return ResponseEntity.status(HttpStatus.OK).body(requestService.getAllRequestByUser(userId));
     }
 
-    @PatchMapping(value = "{requestId}/cancel")
+    @PatchMapping(value = "/{requestId}/cancel")
     public ResponseEntity<ParticipationRequestDto> cancellationRequest(@PathVariable Long userId,
                                                                        @PathVariable Long requestId) {
         return ResponseEntity.status(HttpStatus.OK).body(requestService.cancellationRequest(userId, requestId));
