@@ -62,7 +62,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiError errorInvalidRequestException (InvalidRequestException  e) {
+    public ApiError errorInvalidRequestException(InvalidRequestException e) {
         StringWriter out = new StringWriter();
         e.printStackTrace(new PrintWriter(out));
         String stackTrace = out.toString();

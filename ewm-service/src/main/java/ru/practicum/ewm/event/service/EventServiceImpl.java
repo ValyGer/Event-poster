@@ -438,13 +438,13 @@ public class EventServiceImpl implements EventService {
         switch (stateActionForAdmin) {
             case REJECT_EVENT:
                 if (eventSaved.getState().equals(EventState.PUBLISHED)) {
-                    throw new IllegalArgumentException("The event has already been published.");
+                    throw new DataConflictRequest("The event has already been published.");
                 }
                 eventSaved.setState(EventState.CANCELED);
                 break;
             case PUBLISH_EVENT:
                 if (!eventSaved.getState().equals(EventState.PENDING)) {
-                    throw new IllegalArgumentException("Cannot publish the event because it's not in the right state: PUBLISHED");
+                    throw new DataConflictRequest("Cannot publish the event because it's not in the right state: PUBLISHED");
                 }
                 eventSaved.setState(EventState.PUBLISHED);
                 eventSaved.setPublishedOn(LocalDateTime.now());
@@ -565,7 +565,7 @@ public class EventServiceImpl implements EventService {
         List<BooleanExpression> conditions = new ArrayList<>();
 
         // фильтрация по списку пользователь
-        if (request.getUsers() !=null && !request.getUsers().isEmpty()) {
+        if (request.getUsers() != null && !request.getUsers().isEmpty()) {
             conditions.add(
                     event.initiator.id.in(request.getUsers())
             );
@@ -614,7 +614,6 @@ public class EventServiceImpl implements EventService {
         return eventRepository.findAllById(eventsId);
     }
 
-
     public void updateEventData(String dataTime, Event eventSaved) {
         if (LocalDateTime.parse(dataTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
                 .isBefore(LocalDateTime.now().plusHours(1))) {
@@ -624,7 +623,6 @@ public class EventServiceImpl implements EventService {
         eventSaved.setEventDate(LocalDateTime.parse(dataTime,
                 DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
     }
-
 }
 
 

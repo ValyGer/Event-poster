@@ -6,11 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-import ru.practicum.ewm.errors.ConflictException;
+import ru.practicum.ewm.errors.DataConflictRequest;
 import ru.practicum.ewm.errors.NotFoundException;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.model.EventState;
-import ru.practicum.ewm.event.respository.EventRepository;
 import ru.practicum.ewm.event.service.EventService;
 import ru.practicum.ewm.request.dto.ParticipationRequestDto;
 import ru.practicum.ewm.request.dto.RequestMapper;
@@ -51,21 +50,23 @@ public class RequestServiceImpl implements RequestService {
         List<Request> requests = requestRepository.findAllByRequesterIdAndEventId(userId, eventId);
 
         if (!requests.isEmpty()) {
-            throw new ConflictException("You cannot add a repeat request");
+            throw new DataConflictRequest("You cannot add a repeat request");
         }
         if (userId == event.getInitiator().getId()) {
-            throw new ConflictException("The initiator of the event cannot add a request to participate in his event");
+            throw new DataConflictRequest("The initiator of the event cannot add a request to participate in his event");
         }
         if (!event.getState().equals((EventState.PUBLISHED))) {
-            throw new ConflictException("You cannot participate in an unpublished event");
+            throw new DataConflictRequest("You cannot participate in an unpublished event");
         }
-        if (event.getParticipantLimit() != 0 &&
-                (Long.valueOf(event.getParticipantLimit()) == event.getConfirmedRequests()))
-            throw new ConflictException("You cannot add a reservation, " +
+
+        if (!event.getParticipantLimit().equals(0) &&
+                Long.valueOf(event.getParticipantLimit()).equals(event.getConfirmedRequests())) {
+            throw new DataConflictRequest("You cannot add a reservation, " +
                     "the event has reached the limit of requests for participation");
+        }
 
         Request request = new Request(event, user);
-        if ((event.getParticipantLimit() == 0) || (event.getRequestModeration() == null)) {
+        if (event.getParticipantLimit().equals(0) || !event.getRequestModeration()) {
             request.setStatus(RequestStatus.CONFIRMED);
             event.setConfirmedRequests(event.getConfirmedRequests() + 1);
             eventService.addRequestToEvent(event);
@@ -77,14 +78,14 @@ public class RequestServiceImpl implements RequestService {
     }
 
     public List<ParticipationRequestDto> getAllRequestByUser(Long userId) {
-        User user = userService.getUserById(userId);
+        userService.getUserById(userId);
         List<Request> requests = requestRepository.findAllByRequesterId(userId);
         log.info("Поиск запросов на участие в событиях пользователя с ID = {}", userId);
         return requests.stream().map(requestMapper::toParticipationRequestDto).collect(Collectors.toList());
     }
 
     public ParticipationRequestDto cancellationRequest(Long userId, Long requestId) {
-        User user = userService.getUserById(userId);
+        userService.getUserById(userId);
         Request request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("Request with id = " + requestId + " was not found"));
         request.setStatus(RequestStatus.CANCELED);
