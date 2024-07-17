@@ -1,5 +1,6 @@
 package ru.practicum.ewm.event.service;
 
+import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.event.dto.*;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.request.dto.EventRequestStatusUpdateRequest;
@@ -8,6 +9,7 @@ import ru.practicum.ewm.request.dto.ParticipationRequestDto;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Optional;
 
 public interface EventService {
 
@@ -43,4 +45,6 @@ public interface EventService {
     void addRequestToEvent(Event event);
 
     List<Event> getAllEventsByListId(List<Long> eventsId);
+
+    Optional<Event> findByCategory (Category category);
 }

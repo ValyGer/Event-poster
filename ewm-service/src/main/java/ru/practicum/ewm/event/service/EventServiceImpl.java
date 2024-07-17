@@ -623,6 +623,10 @@ public class EventServiceImpl implements EventService {
         eventSaved.setEventDate(LocalDateTime.parse(dataTime,
                 DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
     }
+
+    public Optional<Event> findByCategory (Category category){
+        return eventRepository.findByCategory(category);
+    }
 }
 
 

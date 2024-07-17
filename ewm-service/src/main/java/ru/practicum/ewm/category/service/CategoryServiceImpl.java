@@ -10,6 +10,7 @@ import ru.practicum.ewm.category.dto.CategoryMapper;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.repository.CategoryRepository;
 import ru.practicum.ewm.errors.ConflictException;
+import ru.practicum.ewm.errors.DataConflictRequest;
 import ru.practicum.ewm.errors.NotFoundException;
 import ru.practicum.ewm.event.dto.EventAdminParams;
 import ru.practicum.ewm.event.service.EventService;
@@ -38,10 +39,15 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Transactional
     public void deleteCategory(Long catId) {
-        Category category = categoryRepository.findById(catId).orElseThrow(() ->
-                new NotFoundException("Category with id = " + catId + " was not found"));
-        categoryRepository.deleteById(catId);
-        log.info("Категория с id = {}, успешно удалена", catId);
+        Optional<Category> category = categoryRepository.findById(catId);
+        if (category.isEmpty()) {
+            throw new NotFoundException("Category with id = " + catId + " was not found");
+        } else if (eventService.findByCategory(category.get()).isPresent()){
+            throw new DataConflictRequest("Events are associated with the id = " + catId+" category");
+        } else {
+            categoryRepository.deleteById(catId);
+            log.info("Категория с id = {}, успешно удалена", catId);
+        }
     }
 
     @Transactional
