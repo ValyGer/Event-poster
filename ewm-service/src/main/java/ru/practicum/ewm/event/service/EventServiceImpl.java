@@ -138,6 +138,10 @@ public class EventServiceImpl implements EventService {
             throw new NotFoundException("Event with ID = " + eventId + " was not found");
         }
 
+        if (eventSaved.getState().equals(EventState.PUBLISHED)){
+            throw new DataConflictRequest("It is not possible to make changes to an already published event.");
+        }
+
         if (updateEvent.getEventDate() != null) {
             if (LocalDateTime.parse(updateEvent.getEventDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
                     .isBefore(LocalDateTime.now().plusHours(2))) {
@@ -148,7 +152,6 @@ public class EventServiceImpl implements EventService {
                         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
             }
         }
-
 
         if (updateEvent.getStateAction() != null) {
             updateStateOfEventByUser(updateEvent.getStateAction(), eventSaved);
@@ -208,7 +211,7 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventRequestStatusUpdateResult changeRequestEventStatus(Long userId, Long eventId,
                                                                    EventRequestStatusUpdateRequest requestUpdate) {
-        User user = userService.getUserById(userId);
+        userService.getUserById(userId);
         Event event = getEventById(eventId);
         if (event.getInitiator().getId() != userId) {
             throw new RuntimeException("Пользователь с ID = " + userId + " не является инициатором события с ID = " + eventId);
@@ -220,7 +223,7 @@ public class EventServiceImpl implements EventService {
 
         for (Request request : requests) {
             if (!request.getStatus().equals(RequestStatus.PENDING)) {
-                throw new ConflictException("Изменить статус можно только у ожидающей подтверждения заявки на " +
+                throw new DataConflictRequest("Изменить статус можно только у ожидающей подтверждения заявки на " +
                         "участие");
             }
         }
@@ -239,12 +242,12 @@ public class EventServiceImpl implements EventService {
                         confirmedRequests.add(requestMapper.toParticipationRequestDto(request));
                     }
                 } else if (event.getConfirmedRequests() >= event.getParticipantLimit()) {
-                    throw new ConflictException("Достигнут лимит по заявкам на данное событие");
+                    throw new DataConflictRequest("The limit on applications for this event has been reached");
                 } else {
                     for (Request request : requests) {
                         if (event.getConfirmedRequests() < event.getParticipantLimit()) {
                             request.setStatus(RequestStatus.CONFIRMED);
-                            event.setConfirmedRequests(event.getConfirmedRequests() + 1L);
+                            event.setConfirmedRequests(event.getConfirmedRequests() + 1);
                             confirmedRequests.add(requestMapper.toParticipationRequestDto(request));
                         } else {
                             request.setStatus(RequestStatus.REJECTED);
