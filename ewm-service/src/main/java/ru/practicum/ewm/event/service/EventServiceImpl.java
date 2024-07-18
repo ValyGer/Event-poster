@@ -137,9 +137,19 @@ public class EventServiceImpl implements EventService {
         } else {
             throw new NotFoundException("Event with ID = " + eventId + " was not found");
         }
+
         if (updateEvent.getEventDate() != null) {
-            updateEventData(updateEvent.getEventDate(), eventSaved);
+            if (LocalDateTime.parse(updateEvent.getEventDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                    .isBefore(LocalDateTime.now().plusHours(2))) {
+                throw new InvalidRequestException("The start date of the event to be modified must be no earlier " +
+                        "than two hours from the date of publication.");
+            } else {
+                eventSaved.setEventDate(LocalDateTime.parse(updateEvent.getEventDate(),
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            }
         }
+
+
         if (updateEvent.getStateAction() != null) {
             updateStateOfEventByUser(updateEvent.getStateAction(), eventSaved);
         }
@@ -556,6 +566,7 @@ public class EventServiceImpl implements EventService {
         public int compare(EventShortDto o1, EventShortDto o2) {
             return o1.getEventDate().compareTo(o2.getEventDate());
         }
+
     }
 
     // Собираем условие по которому будем выбирать события из базы данных для запроса администратора
@@ -624,7 +635,7 @@ public class EventServiceImpl implements EventService {
                 DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
     }
 
-    public Optional<Event> findByCategory (Category category){
+    public Optional<Event> findByCategory(Category category) {
         return eventRepository.findByCategory(category);
     }
 }
