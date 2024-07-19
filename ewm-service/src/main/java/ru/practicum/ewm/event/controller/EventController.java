@@ -137,7 +137,7 @@ public class EventController {
                 .build();
 
         EndpointHit endpointHit = new EndpointHit(
-                "SERVICE_ID",
+                "ewm-main-service",
                 httpServletRequest.getRequestURI(),
                 httpServletRequest.getRemoteAddr(),
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
@@ -152,7 +152,7 @@ public class EventController {
                                                         HttpServletRequest httpServletRequest) {
 
         EndpointHit endpointHit = new EndpointHit(
-                "SERVICE_ID",
+                "ewm-main-service",
                 httpServletRequest.getRequestURI(),
                 httpServletRequest.getRemoteAddr(),
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));

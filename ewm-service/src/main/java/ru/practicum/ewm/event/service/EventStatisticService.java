@@ -36,7 +36,7 @@ public class EventStatisticService {
 
         List<String> uris = new ArrayList<>();
         for (Long eventId : eventsId) {
-            uris.add("EVENT_URI" + eventId);
+            uris.add("/events/" + eventId);
         }
 
         ResponseEntity<Object> response = statClient.getStats(

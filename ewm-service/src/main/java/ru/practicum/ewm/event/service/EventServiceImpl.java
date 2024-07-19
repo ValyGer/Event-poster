@@ -368,6 +368,11 @@ public class EventServiceImpl implements EventService {
 
     public List<EventShortDto> getAllEventsByUser(EventPublicParams request, HttpServletRequest httpServletRequest) {
 
+        if (request.getRangeStart() != null && request.getRangeEnd() != null
+                && request.getRangeStart().isAfter(request.getRangeEnd())) {
+            throw new InvalidRequestException("The start date of the event to be modified must be no earlier " +
+                    "than one hour from the date of publication.");
+        }
 
         //формируем условие выборки
         BooleanExpression conditions = makeEventsQueryConditionsForPublic(request);
@@ -377,7 +382,7 @@ public class EventServiceImpl implements EventService {
                 request.getFrom() / request.getSize(), request.getSize());
 
         //запрашиваем события из базы
-        List<Event> events = eventRepository.findAll(conditions, pageRequest).toList();
+        List<Event> events = eventRepository.findAll(conditions, pageRequest).getContent();
 
         //запрашиваем количество одобренных заявок на участие в каждом событии
         Map<Long, Long> eventToRequestsCount = getEventRequests(events);
