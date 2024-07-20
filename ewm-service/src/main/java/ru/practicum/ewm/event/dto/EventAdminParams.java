@@ -20,7 +20,4 @@ public class EventAdminParams {
     private LocalDateTime rangeEnd;
     private Integer from;
     private Integer size;
-
-    public EventAdminParams(List<Long> category) {
-    }
 }

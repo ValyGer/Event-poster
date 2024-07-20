@@ -12,8 +12,6 @@ import ru.practicum.ewm.event.model.EventState;
 import java.util.List;
 import java.util.Optional;
 
-import static ru.practicum.ewm.event.model.EventState.PUBLISHED;
-
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPredicateExecutor<Event> {
 
@@ -27,5 +25,5 @@ public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPre
 
     Optional<Event> findByIdAndState(Long id, EventState state);
 
-    Optional<Event> findByCategory (Category category);
+    Optional<Event> findByCategory(Category category);
 }

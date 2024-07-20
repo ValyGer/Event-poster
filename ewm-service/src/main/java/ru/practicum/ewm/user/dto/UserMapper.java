@@ -10,6 +10,4 @@ public interface UserMapper {
     User toUser(UserDtoRequest userDtoRequest);
 
     UserDto toUserDto(User user);
-
-    UserShortDto toUserShortDto(User user);
 }

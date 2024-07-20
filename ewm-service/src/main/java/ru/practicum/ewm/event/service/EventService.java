@@ -46,5 +46,5 @@ public interface EventService {
 
     List<Event> getAllEventsByListId(List<Long> eventsId);
 
-    Optional<Event> findByCategory (Category category);
+    Optional<Event> findByCategory(Category category);
 }

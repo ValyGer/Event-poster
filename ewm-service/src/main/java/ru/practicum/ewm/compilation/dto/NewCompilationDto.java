@@ -1,9 +1,7 @@
 package ru.practicum.ewm.compilation.dto;
 
 import lombok.*;
-import org.springframework.validation.annotation.Validated;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.List;

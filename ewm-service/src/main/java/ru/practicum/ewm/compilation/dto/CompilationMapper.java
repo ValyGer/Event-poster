@@ -15,9 +15,4 @@ public interface CompilationMapper {
     @Mapping(source = "isPinned", target = "pinned")
     @Mapping(target = "events", ignore = true)
     CompilationDto toCompilationDto(Compilation compilation);
-
-    @Mapping(target = "id", ignore = true)
-    @Mapping(source = "pinned", target = "isPinned")
-    @Mapping(target = "events", ignore = true)
-    Compilation toCompilationForUpdate(UpdateCompilationRequest updateCompilationRequest);
 }
