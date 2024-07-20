@@ -157,6 +157,7 @@ public class EventController {
                 httpServletRequest.getRemoteAddr(),
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         eventStatisticService.addHit(endpointHit);
+
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventDtoById(id, httpServletRequest));
     }
 }

@@ -27,13 +27,16 @@ public class StatClient extends BaseClient {
     }
 
     public ResponseEntity<Object> getStats(String start, String end, List<String> uris, boolean unique) {
+        StringBuilder uri = new StringBuilder();
+        for (String u : uris) {
+            uri.append("&uris=").append(u);
+        }
         Map<String, Object> parameters = Map.of(
                 "start", start,
                 "end", end,
-                "uris", uris,
                 "unique", unique);
         log.info("Выполнение запрос на получение статистики через модуль client");
-        return get("/stats?start={start}&end={end}&uris={uris}&unique={unique}", parameters);
+        return get("/stats?start={start}&end={end}" + uri + "&unique={unique}", parameters);
     }
 
     public ResponseEntity<Object> addHit(EndpointHit endpointHit) {

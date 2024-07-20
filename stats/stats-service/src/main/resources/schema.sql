@@ -5,6 +5,6 @@ CREATE TABLE hits (
   app VARCHAR(128) NOT NULL,
   uri VARCHAR(128) NOT NULL,
   ip VARCHAR(16) NOT NUll,
-  timestamp VARCHAR(64) NOT NULL,
+  timestamp_hit TIMESTAMP WITHOUT TIME ZONE NOT NULL,
   PRIMARY KEY (hit_id)
 );

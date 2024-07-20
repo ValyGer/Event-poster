@@ -9,7 +9,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.service.CategoryService;
-import ru.practicum.ewm.errors.ConflictException;
 import ru.practicum.ewm.errors.DataConflictRequest;
 import ru.practicum.ewm.errors.InvalidRequestException;
 import ru.practicum.ewm.errors.NotFoundException;
@@ -122,7 +121,7 @@ public class EventServiceImpl implements EventService {
         eventFullDto.setViews(views.get(eventFullDto.getId()));
         //
 
-        log.info("Поиск события с ID = {}", eventId);
+        log.info("Выполнен поиск события с ID = {}", eventId);
         return eventFullDto;
     }
 
@@ -138,7 +137,7 @@ public class EventServiceImpl implements EventService {
             throw new NotFoundException("Event with ID = " + eventId + " was not found");
         }
 
-        if (eventSaved.getState().equals(EventState.PUBLISHED)){
+        if (eventSaved.getState().equals(EventState.PUBLISHED)) {
             throw new DataConflictRequest("It is not possible to make changes to an already published event.");
         }
 
@@ -284,16 +283,9 @@ public class EventServiceImpl implements EventService {
         //запрашиваем события из базы
         List<Event> events = eventRepository.findAll(conditions, pageRequest).toList();
 
-        //запрашиваем количество одобренных заявок на участие в каждом событии
-        Map<Long, Long> eventToRequestsCount = getEventRequests(events);
-
         //Запрашиваем количество просмотров каждого события
-        //       ----------------------------------------------
 
         List<EventFullDto> eventsFullDto = events.stream().map(eventMapper::toEventFullDto).collect(Collectors.toList());
-        for (EventFullDto eventFullDto : eventsFullDto) {
-            eventFullDto.setConfirmedRequests(eventToRequestsCount.get(eventFullDto.getId()));
-        }
 
         //Получаем и добавляем просмотры
         Map<Long, Long> views = eventStatisticService.getEventsViews(eventsFullDto.stream()
@@ -303,6 +295,7 @@ public class EventServiceImpl implements EventService {
             eventFullDto.setViews(views.get(eventFullDto.getId()));
         }
         //
+        log.info("События успешно выгружены");
         return eventsFullDto;
     }
 
@@ -352,9 +345,7 @@ public class EventServiceImpl implements EventService {
         eventSaved = eventRepository.save(eventSaved);
 
         //Получаем и добавляем просмотры
-        Map<Long, Long> views = eventStatisticService.getEventsViews(List.of(eventSaved).stream()
-                .map(Event::getId)
-                .collect(Collectors.toList()));
+        Map<Long, Long> views = eventStatisticService.getEventsViews(List.of(eventId));
 
         EventFullDto eventFullDto = eventMapper.toEventFullDto(eventSaved);
         eventFullDto.setViews(views.get(eventFullDto.getId()));
@@ -403,8 +394,10 @@ public class EventServiceImpl implements EventService {
         }
 
         if (request.getSort().equals(SortType.VIEWS.toString())) {
+            log.info("События успешно выгружены");
             return eventsShortDto.stream().sorted(new EventSortByViews()).collect(Collectors.toList());
         } else {
+            log.info("События успешно выгружены");
             return eventsShortDto.stream().sorted(new EventSortByEventDate()).collect(Collectors.toList());
         }
     }
@@ -414,17 +407,17 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findByIdAndState(id, EventState.PUBLISHED)
                 .orElseThrow(() -> new NotFoundException("Event must be published"));
 
-        Map<Long, Long> views = eventStatisticService.getEventsViews(List.of(event).stream()
-                .map(Event::getId)
-                .collect(Collectors.toList()));
+        Map<Long, Long> views = eventStatisticService.getEventsViews(List.of(id));
         EventFullDto eventFullDto = eventMapper.toEventFullDto(event);
         eventFullDto.setViews(views.get(eventFullDto.getId()));
 
+        log.info("Событие ID = {} успешно обновлено от имени администратора", id);
         return eventFullDto;
     }
 
 
     // ----- Вспомогательная часть ----
+
     // Вспомогательная функция обновления статуса
     private void updateStateOfEventByUser(String stateAction, Event eventSaved) {
         StateActionForUser stateActionForUser;
@@ -647,5 +640,4 @@ public class EventServiceImpl implements EventService {
         return eventRepository.findByCategory(category);
     }
 }
-
 

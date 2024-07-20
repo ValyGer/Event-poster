@@ -35,12 +35,12 @@ public class EventStatisticService {
         }
 
         List<String> uris = new ArrayList<>();
-        for (Long eventId : eventsId) {
-            uris.add("/events/" + eventId);
+        for (Long id : eventsId) {
+            uris.add("/events/" + id);
         }
 
         ResponseEntity<Object> response = statClient.getStats(
-                LocalDateTime.now().minusDays(30).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                LocalDateTime.now().minusDays(30L).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
                 uris,
                 true
