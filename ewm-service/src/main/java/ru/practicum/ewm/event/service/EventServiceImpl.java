@@ -38,6 +38,7 @@ import java.util.stream.StreamSupport;
 @Slf4j
 @NoArgsConstructor(force = true)
 public class EventServiceImpl implements EventService {
+
     private final EventRepository eventRepository;
     private final UserService userService;
     private final RequestService requestService;
@@ -640,4 +641,3 @@ public class EventServiceImpl implements EventService {
         return eventRepository.findByCategory(category);
     }
 }
-

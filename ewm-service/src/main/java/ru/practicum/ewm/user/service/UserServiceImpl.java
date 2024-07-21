@@ -57,5 +57,4 @@ public class UserServiceImpl implements UserService {
         }
         throw new NotFoundException("User with id = " + userId + " was not found");
     }
-
 }

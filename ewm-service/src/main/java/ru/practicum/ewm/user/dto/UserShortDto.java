@@ -10,6 +10,7 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 public class UserShortDto {
+
     private Long id;
     private String name;
 }

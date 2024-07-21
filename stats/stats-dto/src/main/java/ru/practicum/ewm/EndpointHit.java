@@ -10,6 +10,7 @@ import lombok.ToString;
 @ToString
 @RequiredArgsConstructor
 public class EndpointHit {
+
     private String app;
     private String uri;
     private String ip;

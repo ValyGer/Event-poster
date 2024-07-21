@@ -29,7 +29,6 @@ import java.util.List;
 public class EventController {
 
     private final EventService eventService;
-
     private final EventStatisticService eventStatisticService;
 
     // Часть private

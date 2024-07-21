@@ -66,5 +66,4 @@ public class EventStatisticService {
     public void addHit(EndpointHit endpointHit) {
         statClient.addHit(endpointHit);
     }
-
 }
