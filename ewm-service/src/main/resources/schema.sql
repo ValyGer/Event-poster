@@ -85,6 +85,3 @@ ALTER TABLE compilation_events ADD CONSTRAINT fk_comp_events_to_events FOREIGN K
 ALTER TABLE comments ADD CONSTRAINT fk_comment_users FOREIGN KEY (author_id) REFERENCES users (id);
 
 ALTER TABLE comments ADD CONSTRAINT fk_comment_event FOREIGN KEY (event_id) REFERENCES events (id);
-
-
-
