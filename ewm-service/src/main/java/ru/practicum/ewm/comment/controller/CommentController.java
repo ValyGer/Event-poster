@@ -22,6 +22,7 @@ public class CommentController {
 
     private final CommentService commentService;
 
+
     // Часть private
 
     // Добавление комментариев к событию
@@ -70,6 +71,7 @@ public class CommentController {
         commentService.deleteCommentByUser(authorId, commentId);
     }
 
+
     // Часть admin
 
     // Изменение конкретного комментария
@@ -95,7 +97,7 @@ public class CommentController {
 
     // Получение конкретного комментария к событию
     @GetMapping("events/{eventId}/comments")
-    public ResponseEntity<List<CommentDtoPublic>> getAllCommentsByEventPublic(@NonNull @PathVariable("evenIs") Long eventId) {
+    public ResponseEntity<List<CommentDtoPublic>> getAllCommentsByEventPublic(@NonNull @PathVariable("eventId") Long eventId) {
         log.info("Вызов метода получения всех комментариев к событию с ID = {} (getAllCommentsByEventPublic).", eventId);
         return ResponseEntity.status(HttpStatus.OK).body(commentService.getAllCommentsByEventPublic(eventId));
     }

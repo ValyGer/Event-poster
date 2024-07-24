@@ -16,8 +16,4 @@ public class CommentDto {
     private String authorName;
     private String eventId;
     private LocalDateTime create;
-
-    public CommentDto(String text) {
-        this.text = text;
-    }
 }

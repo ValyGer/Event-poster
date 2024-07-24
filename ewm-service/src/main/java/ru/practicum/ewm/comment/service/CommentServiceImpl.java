@@ -31,6 +31,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommentMapper commentMapper;
     private final CommentRepository commentRepository;
 
+
     // Часть Private
 
     // Добавление комментария к событию
@@ -119,6 +120,7 @@ public class CommentServiceImpl implements CommentService {
         log.info("Комментарий с ID = {}, успешно удален администратором.", commentId);
         commentRepository.deleteById(getCommentById(commentId).getId());
     }
+
 
     // Часть Public
 
