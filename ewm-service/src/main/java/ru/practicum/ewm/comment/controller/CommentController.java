@@ -1,4 +1,4 @@
-package ru.practicum.ewm.comment;
+package ru.practicum.ewm.comment.controller;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -7,7 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.ewm.event.service.EventService;
+import ru.practicum.ewm.comment.dto.CommentDto;
+import ru.practicum.ewm.comment.dto.CommentDtoPublic;
+import ru.practicum.ewm.comment.service.CommentService;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -18,7 +20,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CommentController {
 
-    private final EventService eventService;
     private final CommentService commentService;
 
     // Часть private
@@ -41,11 +42,11 @@ public class CommentController {
         return ResponseEntity.status(HttpStatus.OK).body(commentService.getCommentByUser(authorId, commentId));
     }
 
-    // Получение всех комментариев пользователя
-    @GetMapping("/users/{userId}/comments")
-    public ResponseEntity<List<CommentDto>> getAllCommentsByUser(@NonNull @PathVariable("userId") Long authorId) {
-        log.info("Вызов метода получение всех комментариев пользователя с ID = {} (getAllCommentsByUser)", authorId);
-        return ResponseEntity.status(HttpStatus.OK).body(commentService.getAllCommentsByUser(authorId));
+    // Получение всех комментариев к событию
+    @GetMapping("user/events/{eventId}/comments")
+    public ResponseEntity<List<CommentDto>> getAllCommentsByEvent(@NonNull @PathVariable("eventId") Long eventId) {
+        log.info("Вызов метода получение всех комментариев к событию с ID = {} (getAllCommentsByEvent)", eventId);
+        return ResponseEntity.status(HttpStatus.OK).body(commentService.getAllCommentsByEvent(eventId));
     }
 
     // Редактирование комментария к событию
@@ -56,9 +57,18 @@ public class CommentController {
         log.info("Вызов метода обновления комментария с ID = {} пользователем с ID = {} (updateCommentByUser)",
                 authorId, commentId);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(commentService.updateCommentByUser(authorId, commentId, commentId));
+                .body(commentService.updateCommentByUser(authorId, commentId, commentDto));
     }
 
+    // Удаление комментария
+    @DeleteMapping("/users/{userId}/comments/{commentId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCommentByUser(@NonNull @PathVariable("userId") Long authorId,
+                                    @NonNull @PathVariable("commentId") Long commentId) {
+        log.info("Вызов метода удаления комментария с ID = {} автором с ID ={} (deleteCommentByUser)",
+                commentId, authorId);
+        commentService.deleteCommentByUser(authorId, commentId);
+    }
 
     // Часть admin
 
@@ -71,7 +81,7 @@ public class CommentController {
         return ResponseEntity.status(HttpStatus.OK).body(commentService.updateCommentByAdmin(commentId, commentDto));
     }
 
-    // Удаление комментариев
+    // Удаление комментария
     @DeleteMapping("admin/comments/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCommentByAdmin(@NonNull @PathVariable("commentId") Long commentId) {
@@ -84,9 +94,9 @@ public class CommentController {
     // Часть public
 
     // Получение конкретного комментария к событию
-    @GetMapping("/comments/{commentId}")
-    public ResponseEntity<CommentDto> getComment(@NonNull @PathVariable("commentId") Long commentId) {
-        log.info("Вызов метода получения комментария с ID = {} неавторизованным пользователем (getComment)", commentId);
-        return ResponseEntity.status(HttpStatus.OK).body(commentService.getComment(commentId));
+    @GetMapping("events/{eventId}/comments")
+    public ResponseEntity<List<CommentDtoPublic>> getAllCommentsByEventPublic(@NonNull @PathVariable("evenIs") Long eventId) {
+        log.info("Вызов метода получения всех комментариев к событию с ID = {} (getAllCommentsByEventPublic).", eventId);
+        return ResponseEntity.status(HttpStatus.OK).body(commentService.getAllCommentsByEventPublic(eventId));
     }
 }
