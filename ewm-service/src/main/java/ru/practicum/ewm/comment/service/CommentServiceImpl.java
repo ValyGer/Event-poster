@@ -34,13 +34,13 @@ public class CommentServiceImpl implements CommentService {
 
     // Часть Private
 
-    // Добавление комментария к событию
+    // Добавление комментария к событию (может быть добавлен только к опубликованным событиям)
     @Override
     public CommentDto addCommentToEvent(Long authorId, Long eventId, CommentDto commentDto) {
         Comment comment = commentMapper.toComment(commentDto);
         Event event = eventService.getEventById(eventId);
         User author = userService.getUserById(authorId);
-        if (event.getState().equals(EventState.PUBLISHED)) {  // published
+        if (event.getState().equals(EventState.PUBLISHED)) {
             comment.setAuthor(author);
             comment.setEvent(event);
             comment.setCreate(LocalDateTime.now());

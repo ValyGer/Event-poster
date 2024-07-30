@@ -3,7 +3,6 @@ package ru.practicum.ewm.comment.dto;
 import lombok.*;
 
 import javax.validation.constraints.Size;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -11,9 +10,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CommentDto {
+    private Long id;
     @Size(min = 3, max = 2000)
     private String text;
     private String authorName;
     private String eventId;
-    private LocalDateTime create;
+    private String create;
 }
