@@ -1,4 +1,4 @@
-# **Java-explore-with-me**
+# **Event poster**
 
 ***Описание***
 
